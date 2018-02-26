@@ -11,9 +11,7 @@ import ru.csc.bdse.kv.NodeAction;
 import ru.csc.bdse.kv.NodeInfo;
 import ru.csc.bdse.kv.NodeStatus;
 
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -78,8 +76,14 @@ public final class PersistentKeyValueApi implements KeyValueApi {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Set<String> getKeys(String prefix) {
-        throw new UnsupportedOperationException();
+        return runQuery(session -> {
+            Set<String> result = new HashSet<>();
+            List<Entity> entities = session.createQuery("FROM Entity WHERE _key LIKE " + prefix + "%").list();
+            entities.forEach(entity -> result.add(entity.getKey()));
+            return result;
+        });
     }
 
     @Override
