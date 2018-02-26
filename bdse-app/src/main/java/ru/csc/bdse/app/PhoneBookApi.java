@@ -1,13 +1,13 @@
 package ru.csc.bdse.app;
 
-import java.util.Iterator;
+import java.util.Set;
 
 /**
- * Represents trivial address book operations
+ * Represents trivial phone book operations
  *
  * @author alesavin
  */
-public interface AddressBookApi<R extends Record> {
+public interface PhoneBookApi<R extends Record> {
 
     /**
      * Put record
@@ -17,10 +17,10 @@ public interface AddressBookApi<R extends Record> {
     /**
      * Throw out record
      */
-    void erasure(R record);
+    void delete(R record);
 
     /**
      * Get all records associated with literal
      */
-    Iterator<R> get(Character literal);
+    Set<R> get(char literal);
 }

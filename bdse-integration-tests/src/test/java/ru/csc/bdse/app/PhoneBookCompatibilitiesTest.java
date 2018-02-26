@@ -7,7 +7,7 @@ import org.junit.Test;
  *
  * @author alesavin
  */
-public class AddressBookApiTest3 {
+public class PhoneBookCompatibilitiesTest {
 
     @Test
     public void write10read11() {
@@ -24,5 +24,3 @@ public class AddressBookApiTest3 {
         // TODO write data in book 1.0 format and erasure in book 1.1
     }
 }
-
-

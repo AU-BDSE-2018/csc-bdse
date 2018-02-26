@@ -3,7 +3,7 @@ package ru.csc.bdse.app;
 import java.util.Set;
 
 /**
- * Address book record
+ * Phone book record
  *
  * @author alesavin
  */

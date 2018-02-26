@@ -7,7 +7,7 @@ import org.junit.Test;
  *
  * @author alesavin
  */
-public class AddressBookApiTest2 {
+public class PhoneBookNonFunctionalTest {
 
     @Test
     public void putGetErasureWithStoppedNode() {
@@ -24,5 +24,3 @@ public class AddressBookApiTest2 {
         // TODO test data was saved after kv-node restarts
     }
 }
-
-
