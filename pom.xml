@@ -42,7 +42,13 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter-web</artifactId>
+			<exclusions> <!-- clashes with slf4j, probably because of hibernate, so just exclude classic -->
+        		<exclusion>
+            		<artifactId>logback-classic</artifactId>
+            		<groupId>ch.qos.logback</groupId>
+        		</exclusion>
+    		</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
