@@ -33,6 +33,17 @@ public class NodeInfo {
         return status;
     }
 
+    public void setStatus(NodeAction action) {
+        switch (action) {
+            case UP:
+                status = NodeStatus.UP;
+                break;
+            case DOWN:
+                status = NodeStatus.DOWN;
+                break;
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

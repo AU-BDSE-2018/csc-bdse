@@ -9,9 +9,12 @@ import org.jetbrains.annotations.NotNull;
 import ru.csc.bdse.kv.KeyValueApi;
 import ru.csc.bdse.kv.NodeAction;
 import ru.csc.bdse.kv.NodeInfo;
+import ru.csc.bdse.kv.NodeStatus;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * Implementation of persistent key-value storage.
@@ -20,10 +23,10 @@ import java.util.Set;
 public final class PersistentKeyValueApi implements KeyValueApi {
 
     @NotNull private final SessionFactory factory;
-    @NotNull private final String name;
+    @NotNull private final NodeInfo state;
 
     public PersistentKeyValueApi(@NotNull String name) {
-        this.name = name;
+        this.state = new NodeInfo(name, NodeStatus.UP);
 
         try {
             factory = new Configuration().configure()
@@ -35,14 +38,13 @@ public final class PersistentKeyValueApi implements KeyValueApi {
         }
     }
 
-    @Override
-    public void put(String key, byte[] value) {
+    private <T> T runQuery(Function<Session, T> fun) {
         Transaction tx = null;
+        T res = null;
 
         try (final Session session = factory.openSession()) {
-            Entity entity = new Entity(key, value);
             tx = session.beginTransaction();
-            session.saveOrUpdate(entity);
+            res = fun.apply(session);
             tx.commit();
         } catch (HibernateException e) {
             if (tx != null) {
@@ -50,29 +52,29 @@ public final class PersistentKeyValueApi implements KeyValueApi {
             }
             e.printStackTrace();
         }
+
+        return res;
+    }
+
+    @Override
+    public void put(String key, byte[] value) {
+        runQuery(session -> {
+            Entity entity = new Entity(key, value);
+            session.saveOrUpdate(entity);
+            return null;
+        });
     }
 
     @Override
     public Optional<byte[]> get(String key) {
-        Transaction tx = null;
-        Entity entity = null;
-
-        try (final Session session = factory.openSession()) {
-            tx = session.beginTransaction();
-            entity = session.get(Entity.class, key);
-            tx.commit();
-        } catch (HibernateException e) {
-            if (tx != null) {
-                tx.rollback();
+        return Optional.ofNullable(runQuery(session -> {
+            Entity entity = session.get(Entity.class, key);
+            if (entity != null) {
+                return entity.getValue();
+            } else {
+                return null;
             }
-            e.printStackTrace();
-        }
-
-        if (entity != null) {
-            return Optional.of(entity.getValue());
-        } else {
-            return Optional.empty();
-        }
+        }));
     }
 
     @Override
@@ -82,17 +84,23 @@ public final class PersistentKeyValueApi implements KeyValueApi {
 
     @Override
     public void delete(String key) {
-        throw new UnsupportedOperationException();
+        runQuery(session -> {
+            Entity entity = session.load(Entity.class, key);
+            session.delete(entity);
+            return null;
+        });
     }
 
     @Override
     public Set<NodeInfo> getInfo() {
-        throw new UnsupportedOperationException();
+        return Collections.singleton(state);
     }
 
     @Override
     public void action(String node, NodeAction action) {
-        throw new UnsupportedOperationException();
+        if (node.equals(state.getName())) {
+            state.setStatus(action);
+        }
     }
 
 }
