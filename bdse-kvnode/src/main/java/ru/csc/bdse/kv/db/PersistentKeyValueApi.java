@@ -29,6 +29,11 @@ public abstract class PersistentKeyValueApi implements KeyValueApi {
     protected abstract NodeStatus getStatus();
 
     private <T> T runQuery(Function<Session, T> queryFun) {
+        /*
+         * I really don't know how to properly react on DOWN/UP actions,
+         * because I'm unable to start/stop Postgres container from inside of
+         * our node container. So for now just this stupid check.
+         */
         if (getStatus() != NodeStatus.UP) {
             return null;
         }
