@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import ru.csc.bdse.kv.KeyValueApi;
-import ru.csc.bdse.kv.db.PostgresPersistentKeyValueApi;
+import ru.csc.bdse.kv.db.postgres.PostgresPersistentKeyValueApi;
 import ru.csc.bdse.util.Env;
 
 import java.util.UUID;

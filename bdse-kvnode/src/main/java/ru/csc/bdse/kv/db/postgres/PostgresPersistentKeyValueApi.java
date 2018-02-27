@@ -1,10 +1,12 @@
-package ru.csc.bdse.kv.db;
+package ru.csc.bdse.kv.db.postgres;
 
 import org.hibernate.cfg.Configuration;
 import org.jetbrains.annotations.NotNull;
 import ru.csc.bdse.kv.NodeAction;
 import ru.csc.bdse.kv.NodeInfo;
 import ru.csc.bdse.kv.NodeStatus;
+import ru.csc.bdse.kv.db.Entity;
+import ru.csc.bdse.kv.db.PersistentKeyValueApi;
 
 import java.util.Collections;
 import java.util.Set;
