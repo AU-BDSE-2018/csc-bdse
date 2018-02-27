@@ -2,7 +2,6 @@ package ru.csc.bdse.kv.db.postgres;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.service.spi.ServiceException;
 import org.jetbrains.annotations.NotNull;
 import ru.csc.bdse.kv.NodeAction;
 import ru.csc.bdse.kv.NodeInfo;
@@ -27,27 +26,9 @@ public final class PostgresPersistentKeyValueApi extends PersistentKeyValueApi {
 
     @NotNull
     private SessionFactory getFactory() {
-        final int MAX_TRIES = 5;
-        RuntimeException lastException = null;
-
-        // Postgres might need some time to init
-        for (int i = 0; i < MAX_TRIES; i++) {
-            try {
-                return new Configuration().configure("hibernate_postgres.cfg.xml")
-                        .addAnnotatedClass(Entity.class)
-                        .buildSessionFactory();
-            } catch (ServiceException e) {
-                // Postgres is still initializing
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException ie) {
-                    // ignore
-                }
-                lastException = e;
-            }
-        }
-
-        throw lastException;
+        return new Configuration().configure("hibernate_postgres.cfg.xml")
+                .addAnnotatedClass(Entity.class)
+                .buildSessionFactory();
     }
 
     @Override
@@ -70,6 +51,8 @@ public final class PostgresPersistentKeyValueApi extends PersistentKeyValueApi {
         if (!node.equals(state.getName()) || !changingStatus(action)) {
             return;
         }
+
+        System.out.println("Handling action " + action);
 
         final String containerName = "bdse-postgres-db";
         boolean managerSucceed;
