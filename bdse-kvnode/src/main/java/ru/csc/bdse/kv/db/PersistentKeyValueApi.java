@@ -5,7 +5,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
-import org.jetbrains.annotations.NotNull;
 import ru.csc.bdse.kv.KeyValueApi;
 import ru.csc.bdse.kv.NodeStatus;
 
@@ -21,11 +20,8 @@ import java.util.function.Function;
  */
 public abstract class PersistentKeyValueApi implements KeyValueApi {
 
-    @NotNull
-    private final SessionFactory factory = getFactory();
+    protected SessionFactory factory;
 
-    @NotNull
-    protected abstract SessionFactory getFactory();
     protected abstract NodeStatus getStatus();
 
     private <T> T runQuery(Function<Session, T> queryFun) {
