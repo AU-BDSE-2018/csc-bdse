@@ -4,9 +4,13 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 import ru.csc.bdse.kv.KeyValueApi;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -61,7 +65,9 @@ public abstract class PersistentKeyValueApi implements KeyValueApi {
     public Set<String> getKeys(String prefix) {
         return runQuery(session -> {
             Set<String> result = new HashSet<>();
-            List<Entity> entities = session.createQuery("FROM Entity WHERE _key LIKE " + prefix + "%").list();
+            Query q = session.createQuery("FROM Entity WHERE key LIKE ?");
+            q.setParameter(0, prefix + "%");
+            List<Entity> entities = q.list();
             entities.forEach(entity -> result.add(entity.getKey()));
             return result;
         });
