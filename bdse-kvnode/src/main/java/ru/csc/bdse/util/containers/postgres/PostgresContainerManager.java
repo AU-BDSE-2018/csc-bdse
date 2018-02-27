@@ -61,7 +61,9 @@ public class PostgresContainerManager {
     public static boolean run(@NotNull String containerName) {
         try {
             createContainer(containerName);
-            dockerClient.startContainerCmd(containerName).exec();
+            if (getContainerStatus(containerName) != ContainerStatus.RUNNING) {
+                dockerClient.startContainerCmd(containerName).exec();
+            }
             return true;
         } catch (Exception e) {
             System.err.println("Failed to create postgres container." + e);
