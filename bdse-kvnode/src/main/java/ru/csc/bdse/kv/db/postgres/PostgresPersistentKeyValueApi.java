@@ -22,6 +22,7 @@ public final class PostgresPersistentKeyValueApi extends PersistentKeyValueApi {
     }
 
     @Override
+    @NotNull
     protected SessionFactory getFactory() {
         return new Configuration().configure("hibernate_postgres.cfg.xml")
                 .addAnnotatedClass(Entity.class)
