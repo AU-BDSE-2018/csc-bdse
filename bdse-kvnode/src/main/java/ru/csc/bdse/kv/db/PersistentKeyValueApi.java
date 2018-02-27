@@ -21,13 +21,13 @@ public abstract class PersistentKeyValueApi implements KeyValueApi {
 
     protected SessionFactory factory;
 
-    private <T> T runQuery(Function<Session, T> fun) {
+    private <T> T runQuery(Function<Session, T> queryFun) {
         Transaction tx = null;
         T res = null;
 
         try (final Session session = factory.openSession()) {
             tx = session.beginTransaction();
-            res = fun.apply(session);
+            res = queryFun.apply(session);
             tx.commit();
         } catch (HibernateException e) {
             if (tx != null) {
@@ -42,7 +42,7 @@ public abstract class PersistentKeyValueApi implements KeyValueApi {
     @Override
     public void put(String key, byte[] value) {
         runQuery(session -> {
-            Entity entity = new Entity(key, value);
+            final Entity entity = new Entity(key, value);
             session.saveOrUpdate(entity);
             return null;
         });
@@ -51,7 +51,7 @@ public abstract class PersistentKeyValueApi implements KeyValueApi {
     @Override
     public Optional<byte[]> get(String key) {
         return Optional.ofNullable(runQuery(session -> {
-            Entity entity = session.get(Entity.class, key);
+            final Entity entity = session.get(Entity.class, key);
             if (entity != null) {
                 return entity.getValue();
             } else {
@@ -64,10 +64,10 @@ public abstract class PersistentKeyValueApi implements KeyValueApi {
     @SuppressWarnings("unchecked")
     public Set<String> getKeys(String prefix) {
         return runQuery(session -> {
-            Set<String> result = new HashSet<>();
-            Query q = session.createQuery("FROM Entity WHERE key LIKE ?");
+            final Set<String> result = new HashSet<>();
+            final Query q = session.createQuery("FROM Entity WHERE key LIKE ?");
             q.setParameter(0, prefix + "%");
-            List<Entity> entities = q.list();
+            final List<Entity> entities = q.list();
             entities.forEach(entity -> result.add(entity.getKey()));
             return result;
         });
@@ -76,7 +76,7 @@ public abstract class PersistentKeyValueApi implements KeyValueApi {
     @Override
     public void delete(String key) {
         runQuery(session -> {
-            Entity entity = session.load(Entity.class, key);
+            final Entity entity = session.load(Entity.class, key);
             session.delete(entity);
             return null;
         });

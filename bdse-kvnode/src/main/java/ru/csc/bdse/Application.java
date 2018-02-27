@@ -16,11 +16,16 @@ public class Application {
         SpringApplication.run(Application.class, args);
 
         final KeyValueApi node = new Application().node();
-//        node.put("SomeKey", "SomeValue".getBytes());
-//        node.put("OneMoreKey", "OneMoreValue".getBytes());
+        node.put("SomeKey", "SomeValue".getBytes());
+        node.put("OneMoreKey", "OneMoreValue".getBytes());
+        node.put("OneMoreKey123", "OneMoreValue123".getBytes());
 
+        System.out.println("gets:");
         System.out.println(new String(node.get("SomeKey").get()));
         System.out.println(new String(node.get("OneMoreKey").get()));
+
+        System.out.println("getKeys:");
+        node.getKeys("One").forEach(System.out::println);
     }
 
     private static String randomNodeName() {
