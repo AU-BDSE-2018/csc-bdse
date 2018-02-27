@@ -7,6 +7,7 @@ import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import org.jetbrains.annotations.NotNull;
 import ru.csc.bdse.kv.KeyValueApi;
+import ru.csc.bdse.kv.NodeStatus;
 
 import java.util.HashSet;
 import java.util.List;
@@ -25,8 +26,13 @@ public abstract class PersistentKeyValueApi implements KeyValueApi {
 
     @NotNull
     protected abstract SessionFactory getFactory();
+    protected abstract NodeStatus getStatus();
 
     private <T> T runQuery(Function<Session, T> queryFun) {
+        if (getStatus() != NodeStatus.UP) {
+            return null;
+        }
+
         Transaction tx = null;
         T res = null;
 

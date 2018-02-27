@@ -30,6 +30,11 @@ public final class PostgresPersistentKeyValueApi extends PersistentKeyValueApi {
     }
 
     @Override
+    protected NodeStatus getStatus() {
+        return state.getStatus();
+    }
+
+    @Override
     public Set<NodeInfo> getInfo() {
         return Collections.singleton(state);
     }
