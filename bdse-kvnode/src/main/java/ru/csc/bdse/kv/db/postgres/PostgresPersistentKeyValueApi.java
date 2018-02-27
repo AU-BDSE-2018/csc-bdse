@@ -60,6 +60,9 @@ public final class PostgresPersistentKeyValueApi extends PersistentKeyValueApi {
         switch (action) {
             case UP:
                 managerSucceed = new PostgresContainerManager().run(containerName);
+                if (managerSucceed) {
+                    factory = getFactory(); // need to rebuild it
+                }
                 break;
             case DOWN:
                 managerSucceed = PostgresContainerManager.stop(containerName);
