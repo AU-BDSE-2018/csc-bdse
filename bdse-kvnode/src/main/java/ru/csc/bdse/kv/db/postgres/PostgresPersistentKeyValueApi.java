@@ -1,5 +1,6 @@
 package ru.csc.bdse.kv.db.postgres;
 
+import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.jetbrains.annotations.NotNull;
 import ru.csc.bdse.kv.NodeAction;
@@ -18,15 +19,13 @@ public final class PostgresPersistentKeyValueApi extends PersistentKeyValueApi {
 
     public PostgresPersistentKeyValueApi(@NotNull String name) {
         this.state = new NodeInfo(name, NodeStatus.UP);
+    }
 
-        try {
-            factory = new Configuration().configure("hibernate_postgres.cfg.xml")
-                    .addAnnotatedClass(Entity.class)
-                    .buildSessionFactory();
-        } catch (Throwable ex) {
-            System.err.println("Failed to create sessionFactory object." + ex);
-            throw new ExceptionInInitializerError(ex);
-        }
+    @Override
+    protected SessionFactory getFactory() {
+        return new Configuration().configure("hibernate_postgres.cfg.xml")
+                .addAnnotatedClass(Entity.class)
+                .buildSessionFactory();
     }
 
     @Override

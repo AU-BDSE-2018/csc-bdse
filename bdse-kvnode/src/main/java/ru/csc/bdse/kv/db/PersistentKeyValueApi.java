@@ -19,7 +19,9 @@ import java.util.function.Function;
  */
 public abstract class PersistentKeyValueApi implements KeyValueApi {
 
-    protected SessionFactory factory;
+    private final SessionFactory factory = getFactory();
+
+    protected abstract SessionFactory getFactory();
 
     private <T> T runQuery(Function<Session, T> queryFun) {
         Transaction tx = null;
