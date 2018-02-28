@@ -1,6 +1,5 @@
 package ru.csc.bdse.util.containers.postgres;
 
-import com.github.dockerjava.api.command.InspectVolumeResponse;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.Ports;
@@ -29,7 +28,7 @@ public final class PostgresContainerManager extends ContainerManager {
     /*
      * I don't fully understand the task so for now let it be 1 volume for all nodes.
      */
-    private static final String POSTGRES_DATA_VOLUME_NAME = "bdse-postgres-data";
+    // private static final String POSTGRES_DATA_VOLUME_NAME = "bdse-postgres-data";
 
     @Override
     protected void createContainer(@NotNull String containerName) {
@@ -45,10 +44,20 @@ public final class PostgresContainerManager extends ContainerManager {
          * containers with volumes. Thus this ton of ugly code.
          * I feel like I need to make them a pull-request solving it..
          * https://github.com/docker-java/docker-java/issues/523
+         *
+         * The code below is commented because I don't fully understand the task.
+         * This code makes the node TRULY persistent -- even after node container AND postgres
+         * container are closed we still can retrieve all the data. However, tests expect that
+         * we always run new clean container -- they don't clean after themselves and still see
+         * the data they put there last time I ran them.
+         *
+         * I left this dead code just in case I need it eventually.
          */
-        dockerClient.createVolumeCmd().withName(POSTGRES_DATA_VOLUME_NAME).exec();
-        final InspectVolumeResponse inspectVolumeResponse = dockerClient.inspectVolumeCmd(POSTGRES_DATA_VOLUME_NAME).exec();
-        final String volumeMountpoint = inspectVolumeResponse.getMountpoint();
+//        dockerClient.createVolumeCmd().withName(POSTGRES_DATA_VOLUME_NAME).exec();
+//        final InspectVolumeResponse inspectVolumeResponse = dockerClient.inspectVolumeCmd(POSTGRES_DATA_VOLUME_NAME).exec();
+//        final String volumeMountpoint = inspectVolumeResponse.getMountpoint();
+
+        final String volumeMountpoint = "/tmp/postgres_data";
         final Volume postgresData = new Volume(POSTGRES_DATA_PATH);
 
         dockerClient.createContainerCmd(POSTGRES_IMAGE_NAME)
