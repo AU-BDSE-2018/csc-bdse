@@ -66,6 +66,7 @@ public final class PostgresContainerManager extends ContainerManager {
                 .withBinds(new Bind(volumeMountpoint, postgresData))
                 .withHostName(POSTGRES_HOST_NAME)
                 .withEnv(POSTGRES_ENV)
+                .withLinks()
                 .exec();
     }
 
@@ -73,16 +74,13 @@ public final class PostgresContainerManager extends ContainerManager {
     protected void waitContainerInit(@NotNull String containerName) {
         // TODO I'm to lazy and tired to write this in a normal way, thus this solution for now
 
-        /*
-         * for some reason 'until' shell command does not work here, so using ugly while
-         */
-        final String CHEAT_COMMAND = "while (( 1 == 1 )); do docker run --rm --link " + containerName
-                + ":pg postgres:latest pg_isready -U postgres -h pg; if (( $? == 0 )); then break; fi; done";
+        final String CHEAT_COMMAND = "until docker run --rm --link " + containerName
+                + ":pg postgres:latest pg_isready -U postgres -h pg; do sleep 1; done";
 
         try {
             ProcessBuilder builder = new ProcessBuilder();
             builder.redirectErrorStream(true);
-            builder.command("/bin/bash", "-c", CHEAT_COMMAND);
+            builder.command("/bin/sh", "-c", CHEAT_COMMAND);
             Process process = builder.start();
             StreamGobbler streamGobbler =
                     new StreamGobbler(process.getInputStream(), System.out::println);
