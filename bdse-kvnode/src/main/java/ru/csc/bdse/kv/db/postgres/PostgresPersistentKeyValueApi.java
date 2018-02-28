@@ -1,5 +1,6 @@
 package ru.csc.bdse.kv.db.postgres;
 
+import org.hibernate.HibernateException;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.jetbrains.annotations.NotNull;
@@ -61,6 +62,12 @@ public final class PostgresPersistentKeyValueApi extends PersistentKeyValueApi {
             case UP:
                 managerSucceed = new PostgresContainerManager().run(containerName);
                 if (managerSucceed) {
+                    try {
+                        factory.close();
+                    } catch (HibernateException e) {
+                        System.err.println("Error while closing factory: " + e);
+                        e.printStackTrace();
+                    }
                     factory = getFactory(); // need to rebuild it
                 }
                 break;
