@@ -20,7 +20,6 @@ import java.util.function.Consumer;
 public final class PostgresContainerManager extends ContainerManager {
 
     private static final String POSTGRES_IMAGE_NAME = "postgres:latest";
-    private static final String POSTGRES_HOST_NAME = "localhost";
     private static final String POSTGRES_ENV = "POSTGRES_PASSWORD=foobar";
     private static final int POSTGRES_DEFAULT_PORT = 5432;
     private static final ExposedPort POSTGRES_EXPOSED_PORT = new ExposedPort(POSTGRES_DEFAULT_PORT);
@@ -64,7 +63,6 @@ public final class PostgresContainerManager extends ContainerManager {
                 .withPortBindings(portBindings)
                 .withName(containerName)
                 .withBinds(new Bind(volumeMountpoint, postgresData))
-                .withHostName(POSTGRES_HOST_NAME)
                 .withEnv(POSTGRES_ENV)
                 .withLinks()
                 .exec();
