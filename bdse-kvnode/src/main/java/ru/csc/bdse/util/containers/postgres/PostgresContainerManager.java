@@ -1,7 +1,10 @@
 package ru.csc.bdse.util.containers.postgres;
 
+import com.github.dockerjava.api.command.InspectVolumeResponse;
+import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.Ports;
+import com.github.dockerjava.api.model.Volume;
 import org.jetbrains.annotations.NotNull;
 import ru.csc.bdse.util.containers.ContainerManager;
 import ru.csc.bdse.util.containers.ContainerStatus;
@@ -17,8 +20,16 @@ import java.util.function.Consumer;
  */
 public final class PostgresContainerManager extends ContainerManager {
 
+    private static final String POSTGRES_IMAGE_NAME = "postgres:latest";
+    private static final String POSTGRES_HOST_NAME = "localhost";
+    private static final String POSTGRES_ENV = "POSTGRES_PASSWORD=foobar";
     private static final int POSTGRES_DEFAULT_PORT = 5432;
     private static final ExposedPort POSTGRES_EXPOSED_PORT = new ExposedPort(POSTGRES_DEFAULT_PORT);
+    private static final String POSTGRES_DATA_PATH = "/var/lib/postgresql/data"; // path inside of a container
+    /*
+     * I don't fully understand the task so for now let it be 1 volume for all nodes.
+     */
+    private static final String POSTGRES_DATA_VOLUME_NAME = "bdse-postgres-data";
 
     @Override
     protected void createContainer(@NotNull String containerName) {
@@ -26,14 +37,26 @@ public final class PostgresContainerManager extends ContainerManager {
             return;
         }
 
-        Ports portBindings = new Ports();
+        final Ports portBindings = new Ports();
         portBindings.bind(POSTGRES_EXPOSED_PORT, Ports.Binding.bindPort(POSTGRES_DEFAULT_PORT));
 
-        dockerClient.createContainerCmd("postgres:latest")
+        /*
+         * Omg this docker-java library is a total shit in terms of running
+         * containers with volumes. Thus this ton of ugly code.
+         * I feel like I need to make them a pull-request solving it..
+         * https://github.com/docker-java/docker-java/issues/523
+         */
+        dockerClient.createVolumeCmd().withName(POSTGRES_DATA_VOLUME_NAME).exec();
+        final InspectVolumeResponse inspectVolumeResponse = dockerClient.inspectVolumeCmd(POSTGRES_DATA_VOLUME_NAME).exec();
+        final String volumeMountpoint = inspectVolumeResponse.getMountpoint();
+        final Volume postgresData = new Volume(POSTGRES_DATA_PATH);
+
+        dockerClient.createContainerCmd(POSTGRES_IMAGE_NAME)
                 .withPortBindings(portBindings)
                 .withName(containerName)
-                .withHostName("localhost")
-                .withEnv("POSTGRES_PASSWORD=foobar")
+                .withBinds(new Bind(volumeMountpoint, postgresData))
+                .withHostName(POSTGRES_HOST_NAME)
+                .withEnv(POSTGRES_ENV)
                 .exec();
     }
 
