@@ -19,9 +19,16 @@
         <property name="hibernate.connection.password">
             foobar
         </property>
+
+        <!-- Had to move this at runtime as we don't know
+             postgres host until we run its container
+             and I don't want to bind its port (5432) to host machine's one
+
         <property name="hibernate.connection.url">
             jdbc:postgresql://localhost:5432/postgres
         </property>
+
+        -->
 
         <property name="connection_pool_size">1</property>
         <property name="hbm2ddl.auto">update</property>

@@ -4,11 +4,13 @@ import org.hibernate.HibernateException;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.csc.bdse.kv.NodeAction;
 import ru.csc.bdse.kv.NodeInfo;
 import ru.csc.bdse.kv.NodeStatus;
 import ru.csc.bdse.kv.db.Entity;
 import ru.csc.bdse.kv.db.PersistentKeyValueApi;
+import ru.csc.bdse.util.containers.ContainerManager;
 import ru.csc.bdse.util.containers.postgres.PostgresContainerManager;
 
 import java.util.Collections;
@@ -22,13 +24,17 @@ public final class PostgresPersistentKeyValueApi extends PersistentKeyValueApi {
     public PostgresPersistentKeyValueApi(@NotNull String name) {
         this.state = new NodeInfo(name, NodeStatus.DOWN);
         this.action(name, NodeAction.UP);
-        factory = getFactory();
     }
 
     @NotNull
-    private SessionFactory getFactory() {
+    private SessionFactory getFactory(@Nullable String containerIp) {
+        if (containerIp == null) {
+            throw new IllegalArgumentException("Container's IP can't be null");
+        }
+        final String connectionUrl =  String.format("jdbc:postgresql://%s:5432/postgres", containerIp);
         return new Configuration().configure("hibernate_postgres.cfg.xml")
                 .addAnnotatedClass(Entity.class)
+                .setProperty("hibernate.connection.url", connectionUrl)
                 .buildSessionFactory();
     }
 
@@ -63,12 +69,14 @@ public final class PostgresPersistentKeyValueApi extends PersistentKeyValueApi {
                 managerSucceed = new PostgresContainerManager().run(containerName);
                 if (managerSucceed) {
                     try {
-                        factory.close();
+                        if (factory != null) {
+                            factory.close();
+                        }
                     } catch (HibernateException e) {
                         System.err.println("Error while closing factory: " + e);
                         e.printStackTrace();
                     }
-                    factory = getFactory(); // need to rebuild it
+                    factory = getFactory(ContainerManager.getContainerIp(containerName)); // need to rebuild it
                 }
                 break;
             case DOWN:

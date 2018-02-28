@@ -2,8 +2,10 @@ package ru.csc.bdse.util.containers;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.exception.NotFoundException;
+import com.github.dockerjava.api.model.ContainerNetwork;
 import com.github.dockerjava.core.DockerClientBuilder;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class ContainerManager {
 
@@ -32,6 +34,19 @@ public abstract class ContainerManager {
         } else {
             throw new IllegalStateException("Container status is " + containerStatus);
         }
+    }
+
+    @Nullable
+    public static String getContainerIp(@NotNull String containerName) {
+        final ContainerNetwork cn = dockerClient.inspectContainerCmd(containerName).exec()
+                .getNetworkSettings()
+                .getNetworks()
+                .get("bridge");
+        if (cn == null) {
+            throw new IllegalStateException("DB container is not connected to docker's default bridge? O_o");
+        }
+
+        return cn.getIpAddress();
     }
 
     protected abstract void createContainer(@NotNull String containerName);

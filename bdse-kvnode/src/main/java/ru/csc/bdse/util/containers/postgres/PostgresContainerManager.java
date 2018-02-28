@@ -1,8 +1,6 @@
 package ru.csc.bdse.util.containers.postgres;
 
 import com.github.dockerjava.api.model.Bind;
-import com.github.dockerjava.api.model.ExposedPort;
-import com.github.dockerjava.api.model.Ports;
 import com.github.dockerjava.api.model.Volume;
 import org.jetbrains.annotations.NotNull;
 import ru.csc.bdse.util.containers.ContainerManager;
@@ -21,8 +19,6 @@ public final class PostgresContainerManager extends ContainerManager {
 
     private static final String POSTGRES_IMAGE_NAME = "postgres:latest";
     private static final String POSTGRES_ENV = "POSTGRES_PASSWORD=foobar";
-    private static final int POSTGRES_DEFAULT_PORT = 5432;
-    private static final ExposedPort POSTGRES_EXPOSED_PORT = new ExposedPort(POSTGRES_DEFAULT_PORT);
     private static final String POSTGRES_DATA_PATH = "/var/lib/postgresql/data"; // path inside of a container
     /*
      * I don't fully understand the task so for now let it be 1 volume for all nodes.
@@ -34,9 +30,6 @@ public final class PostgresContainerManager extends ContainerManager {
         if (getContainerStatus(containerName) != ContainerStatus.DOES_NOT_EXIST) {
             return;
         }
-
-        final Ports portBindings = new Ports();
-        portBindings.bind(POSTGRES_EXPOSED_PORT, Ports.Binding.bindPort(POSTGRES_DEFAULT_PORT));
 
         /*
          * Omg this docker-java library is a total shit in terms of running
@@ -60,7 +53,6 @@ public final class PostgresContainerManager extends ContainerManager {
         final Volume postgresData = new Volume(POSTGRES_DATA_PATH);
 
         dockerClient.createContainerCmd(POSTGRES_IMAGE_NAME)
-                .withPortBindings(portBindings)
                 .withName(containerName)
                 .withBinds(new Bind(volumeMountpoint, postgresData))
                 .withEnv(POSTGRES_ENV)
