@@ -1,6 +1,7 @@
 package ru.csc.bdse.util.containers;
 
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.command.InspectVolumeResponse;
 import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.model.ContainerNetwork;
 import com.github.dockerjava.core.DockerClientBuilder;
@@ -43,51 +44,11 @@ public abstract class ContainerManager {
      */
     @NotNull
     protected static String createVolume(@NotNull String containerName) {
+        final String dataVolumeName = containerName + "-volume";
 
-        /*
-         * Oh, man...
-         *
-         * We need to make our postgres container persistent. The logical solution is to
-         * run `docker run -v /tmp/postgres_data:POSTGRES_DATA_PATH postgres`, right?
-         * NO! This will create directory `/tmp/postgres_data` on _HOST_ machine, not inside
-         * of our node's docker container.
-         * (I feel like we need to have a serious discussion with docker developers...)
-         *
-         * But we want to create it inside of the node's container -- at least command `VOLUME /tmp` in
-         * Dockerfile of integration tests suggests so. So how can we do that?
-         *
-         * I didn't find a way around to do it properly and I'm too tired already of all this docker/docker-java
-         * "strangeness". So for now I thought that I would just store postgres data in host's /tmp.
-         *
-         * But this, of course, will not work because integration tests don't clean after
-         * themselves and they always give our node the same name `node-0`, so I can not create new folder for postgres
-         * data based on node's name and this old data from previous tests run remains there next time we run them.
-         * This results in `getKeysByPrefix` test fail.
-         *
-         * So I though that maybe we just clean `/tmp/postgres_data + containerName` folder before
-         * we run any tests. And guess what? We can not. You need to have root rights to do that. Thus
-         * it's impossible to save postgres data in /tmp.
-         *
-         * Note that we also unable to use this feature (https://github.com/moby/moby/pull/19568) because
-         * we need to stop/start postgres container and we can not use `--rm` flags.
-         *
-         * Please, smbdy kill me :(
-         *
-         * TL;DR;
-         * I just decided to create this volumes in /tmp of host and modified tests so that they don't
-         * sent default node name. See README for more info.
-         *
-         * I left dead code below just in case I need it later. I know that it's a bit practice
-         * but I returned to that solution many times and who knows -- I might return to it again.
-         */
-
-//        final String dataVolumeName = containerName + "-volume";
-//
-//        dockerClient.createVolumeCmd().withName(dataVolumeName).exec();
-//        final InspectVolumeResponse inspectResponse = dockerClient.inspectVolumeCmd(dataVolumeName).exec();
-//        return inspectResponse.getMountpoint();
-
-        return "/tmp/" + containerName + "-data";
+        dockerClient.createVolumeCmd().withName(dataVolumeName).exec();
+        final InspectVolumeResponse inspectResponse = dockerClient.inspectVolumeCmd(dataVolumeName).exec();
+        return inspectResponse.getMountpoint();
     }
 
     @Nullable
