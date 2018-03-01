@@ -10,10 +10,12 @@ import ru.csc.bdse.util.Env;
 
 import java.io.File;
 import java.time.Duration;
+import java.util.Set;
 import java.util.UUID;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test have to be implemented
@@ -84,12 +86,44 @@ public class KeyValueApiHttpClientNonFunctionalTest {
 
         final String retrievedValue = new String(api.get(key).orElse(Constants.EMPTY_BYTE_ARRAY));
 
-        assertEquals(retrievedValue, value);
+        assertEquals(value, retrievedValue);
     }
 
     @Test
     public void concurrentDeleteAndKeys() {
-        //TODO simultanious delete by key and keys listing
+        final String key = "SomeKey";
+        final String value = "SomeValue";
+
+        final String key1 = "SomeKey1";
+        final String value1 = "SomeValue1";
+
+        // first, put values
+        api.put(key, value.getBytes());
+        api.put(key1, value1.getBytes());
+
+        Thread[] threads = new Thread[100];
+        for (int i = 0; i < threads.length; i++) {
+            threads[i] = new Thread(() -> api.delete(key));
+        }
+
+        for (Thread th : threads) {
+            th.start();
+        }
+
+        for (Thread th : threads) {
+            try {
+                th.join();
+            } catch (InterruptedException e) {
+                // ignore
+            }
+        }
+
+        final Set<String> keys = api.getKeys("");
+        assertEquals(1, keys.size());
+        assertTrue(keys.contains(key1));
+
+        final String retrievedValue = new String(api.get(key1).orElse(Constants.EMPTY_BYTE_ARRAY));
+        assertEquals(value1, retrievedValue);
     }
 
     @Test
