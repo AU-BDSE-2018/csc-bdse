@@ -61,7 +61,7 @@ public final class PostgresPersistentKeyValueApi extends PersistentKeyValueApi {
 
         System.out.println("Handling action " + action);
 
-        final String containerName = "bdse-postgres-db";
+        final String containerName = "bdse-postgres-db-" + state.getName();
         boolean managerSucceed;
 
         switch (action) {
