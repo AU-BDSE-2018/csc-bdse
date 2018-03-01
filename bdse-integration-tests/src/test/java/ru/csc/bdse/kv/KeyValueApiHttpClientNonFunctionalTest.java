@@ -14,8 +14,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Test have to be implemented
@@ -87,6 +86,8 @@ public class KeyValueApiHttpClientNonFunctionalTest {
         final String retrievedValue = new String(api.get(key).orElse(Constants.EMPTY_BYTE_ARRAY));
 
         assertEquals(value, retrievedValue);
+
+        api.delete(key);
     }
 
     @Test
@@ -124,21 +125,51 @@ public class KeyValueApiHttpClientNonFunctionalTest {
 
         final String retrievedValue = new String(api.get(key1).orElse(Constants.EMPTY_BYTE_ARRAY));
         assertEquals(value1, retrievedValue);
+
+        api.delete(key);
+        api.delete(key1);
     }
 
     @Test
     public void actionUpDown() {
-        //TODO test up/down actions
+        final String key = "SomeKey";
+        final String value = "SomeValue";
+
+        api.put(key, value.getBytes());
+        api.action(nodeName, NodeAction.DOWN);
+        api.action(nodeName, NodeAction.UP);
+
+        final String retrievedValue = new String(api.get(key).orElse(Constants.EMPTY_BYTE_ARRAY));
+        assertEquals(value, retrievedValue);
+
+        api.delete(key);
     }
 
     @Test
     public void putWithStoppedNode() {
-        //TODO test put if node/container was stopped
+        final String key = "SomeKey";
+        final String value = "SomeValue";
+
+        api.action(nodeName, NodeAction.DOWN);
+        api.put(key, value.getBytes());
+        api.action(nodeName, NodeAction.UP);
+
+        assertFalse(api.get(key).isPresent());
+
+        api.delete(key);
     }
 
     @Test
     public void getWithStoppedNode() {
-        //TODO test get if node/container was stopped
+        final String key = "SomeKey";
+        final String value = "SomeValue";
+
+        api.put(key, value.getBytes());
+        api.action(nodeName, NodeAction.DOWN);
+        assertFalse(api.get(key).isPresent());
+        api.action(nodeName, NodeAction.UP);
+
+        api.delete(key);
     }
 
     @Test
