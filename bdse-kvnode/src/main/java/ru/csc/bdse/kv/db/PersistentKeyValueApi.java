@@ -88,8 +88,10 @@ public abstract class PersistentKeyValueApi implements KeyValueApi {
     @Override
     public void delete(String key) {
         runQuery(session -> {
-            final Entity entity = session.load(Entity.class, key);
-            session.delete(entity);
+            final Entity entity = session.get(Entity.class, key);
+            if (entity != null) {
+                session.delete(entity);
+            }
             return null;
         });
     }
