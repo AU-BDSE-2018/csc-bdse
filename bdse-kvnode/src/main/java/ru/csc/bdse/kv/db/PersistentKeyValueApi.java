@@ -1,6 +1,5 @@
 package ru.csc.bdse.kv.db;
 
-import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -41,11 +40,11 @@ public abstract class PersistentKeyValueApi implements KeyValueApi {
             tx = session.beginTransaction();
             res = queryFun.apply(session);
             tx.commit();
-        } catch (HibernateException e) {
+        } catch (Exception e) {
             if (tx != null) {
                 tx.rollback();
             }
-            e.printStackTrace();
+            System.err.println("Exception occurred while running query: " + e);
         }
 
         return res;
