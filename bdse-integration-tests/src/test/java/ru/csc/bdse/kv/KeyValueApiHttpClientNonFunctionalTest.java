@@ -174,7 +174,38 @@ public class KeyValueApiHttpClientNonFunctionalTest {
 
     @Test
     public void getKeysByPrefixWithStoppedNode() {
-        //TODO test getKeysByPrefix if node/container was stopped
+        final String key1 = "SomeKey1";
+        final String key2 = "SomeKey2";
+        final String value1 = "SomeValue1";
+        final String value2 = "SomeValue2";
+
+        api.put(key1, value1.getBytes());
+        api.put(key2, value2.getBytes());
+
+        api.action(nodeName, NodeAction.DOWN);
+
+        boolean isException = false;
+
+        // We will receive null in current implementation, but I think that
+        // it's ok.
+        try {
+            api.getKeys("");
+        } catch (RuntimeException e) {
+            if (e.getMessage().equals("Response error: null")) {
+                isException = true;
+            }
+        }
+
+        assertTrue(isException);
+
+        api.action(nodeName, NodeAction.UP);
+
+
+        final Set<String> keys = api.getKeys("");
+        assertEquals(2, keys.size());
+
+        api.delete(key1);
+        api.delete(key2);
     }
 
     @Test
