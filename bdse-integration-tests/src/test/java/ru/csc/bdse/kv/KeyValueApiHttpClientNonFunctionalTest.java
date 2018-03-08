@@ -21,7 +21,7 @@ import static org.junit.Assert.*;
  *
  * @author alesavin
  */
-public class KeyValueApiHttpClientTest2 {
+public class KeyValueApiHttpClientNonFunctionalTest {
 
     private static String nodeName;
     private static GenericContainer node;
