@@ -1,5 +1,8 @@
-package ru.csc.bdse.kv;
+package ru.csc.bdse.kv.replication;
 
+import ru.csc.bdse.kv.KeyValueApi;
+import ru.csc.bdse.kv.NodeAction;
+import ru.csc.bdse.kv.NodeInfo;
 import ru.csc.bdse.util.Require;
 
 import java.util.*;
