@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package serialization;
+
+option java_package = "ru.csc.bdse.serialization";
+option java_outer_classname = "Proto";
+
+import "google/protobuf/timestamp.proto";
+
+// I use required here as we don't expect that this format will change
+message RecordWithTimestamp {
+    bytes value = 1;
+    bool isDeleted = 2;
+    google.protobuf.Timestamp timestamp = 3;
+}
