@@ -47,9 +47,9 @@ public class ConflictResolverImplTest {
 
     @Test
     public void resolveFirstRule() {
-        Map<String, Proto.RecordWithTimestamp> recordsMap = new HashMap<>();
-        recordsMap.put("Node-1", firstRecord);
-        recordsMap.put("Node-2", secondRecord);
+        Map<Integer, Proto.RecordWithTimestamp> recordsMap = new HashMap<>();
+        recordsMap.put(1, firstRecord);
+        recordsMap.put(2, secondRecord);
 
         final Proto.RecordWithTimestamp resolvedRecord = resolver.resolve(recordsMap);
 
@@ -58,10 +58,10 @@ public class ConflictResolverImplTest {
 
     @Test
     public void resolveSecondRule() {
-        Map<String, Proto.RecordWithTimestamp> recordsMap = new HashMap<>();
-        recordsMap.put("Node-1", thirdRecord);
-        recordsMap.put("Node-2", thirdRecord);
-        recordsMap.put("Node-3", fourthRecord);
+        Map<Integer, Proto.RecordWithTimestamp> recordsMap = new HashMap<>();
+        recordsMap.put(1, thirdRecord);
+        recordsMap.put(2, thirdRecord);
+        recordsMap.put(3, fourthRecord);
 
         final Proto.RecordWithTimestamp resolvedRecord = resolver.resolve(recordsMap);
 
@@ -70,11 +70,11 @@ public class ConflictResolverImplTest {
 
     @Test
     public void resolveThirdRule() {
-        Map<String, Proto.RecordWithTimestamp> recordsMap = new HashMap<>();
-        recordsMap.put("Node-1", fourthRecord);
-        recordsMap.put("Node-2", fourthRecord);
-        recordsMap.put("Node-3", thirdRecord);
-        recordsMap.put("Node-4", thirdRecord);
+        Map<Integer, Proto.RecordWithTimestamp> recordsMap = new HashMap<>();
+        recordsMap.put(1, fourthRecord);
+        recordsMap.put(2, fourthRecord);
+        recordsMap.put(3, thirdRecord);
+        recordsMap.put(4, thirdRecord);
 
         final Proto.RecordWithTimestamp resolvedRecord = resolver.resolve(recordsMap);
 
@@ -88,10 +88,10 @@ public class ConflictResolverImplTest {
         final String value3 = "Value-3";
         final String value4 = "Value-4";
 
-        Map<String, Set<String>> nodeToKeys = new HashMap<>();
-        nodeToKeys.put("Node-1", new HashSet<>(Arrays.asList(value1, value2, value4)));
-        nodeToKeys.put("Node-2", Collections.singleton(value2));
-        nodeToKeys.put("Node-3", Collections.singleton(value3));
+        Map<Integer, Set<String>> nodeToKeys = new HashMap<>();
+        nodeToKeys.put(1, new HashSet<>(Arrays.asList(value1, value2, value4)));
+        nodeToKeys.put(2, Collections.singleton(value2));
+        nodeToKeys.put(3, Collections.singleton(value3));
 
         final Set<String> answer = new HashSet<>(Arrays.asList(value1, value2, value3, value4));
         final Set<String> resolveResult = resolver.resolveKeys(nodeToKeys);

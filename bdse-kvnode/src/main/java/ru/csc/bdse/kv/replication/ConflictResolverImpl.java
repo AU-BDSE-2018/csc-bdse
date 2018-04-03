@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 public final class ConflictResolverImpl implements ConflictResolver {
 
     @Override
-    public Proto.RecordWithTimestamp resolve(Map<String, Proto.RecordWithTimestamp> responses) {
+    public Proto.RecordWithTimestamp resolve(Map<Integer, Proto.RecordWithTimestamp> responses) {
         if (responses.size() == 0) {
             throw new RuntimeException("Need at least one response to resolve conflicts");
         }
@@ -30,7 +30,7 @@ public final class ConflictResolverImpl implements ConflictResolver {
 
         // rule #2
 
-        final Map<Proto.RecordWithTimestamp, List<String>> responseToNodesMap = getResponseToNodesMap(responses);
+        final Map<Proto.RecordWithTimestamp, List<Integer>> responseToNodesMap = getResponseToNodesMap(responses);
         final int mostCommonCnt = responseToNodesMap.values()
                 .stream()
                 .map(List::size)
@@ -38,7 +38,7 @@ public final class ConflictResolverImpl implements ConflictResolver {
                 .orElseThrow(() -> new RuntimeException("impossible"));
 
         // leave only most common records
-        final Map<Proto.RecordWithTimestamp, List<String>> mostCommonRecords = responseToNodesMap.entrySet()
+        final Map<Proto.RecordWithTimestamp, List<Integer>> mostCommonRecords = responseToNodesMap.entrySet()
                 .stream()
                 .filter(entry -> entry.getValue().size() == mostCommonCnt)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -49,7 +49,7 @@ public final class ConflictResolverImpl implements ConflictResolver {
 
         // rule #3
 
-        final String nodeToUse = responses.entrySet()
+        final int nodeToUse = responses.entrySet()
                 .stream()
                 .filter(e -> mostCommonRecords.containsKey(e.getValue()))
                 .map(Map.Entry::getKey)
@@ -60,7 +60,7 @@ public final class ConflictResolverImpl implements ConflictResolver {
     }
 
     @Override
-    public Set<String> resolveKeys(Map<String, Set<String>> responses) {
+    public Set<String> resolveKeys(Map<Integer, Set<String>> responses) {
         return responses.values()
                 .stream()
                 .collect(
@@ -90,15 +90,15 @@ public final class ConflictResolverImpl implements ConflictResolver {
         }
     }
 
-    private Map<Proto.RecordWithTimestamp, List<String>> getResponseToNodesMap(Map<String, Proto.RecordWithTimestamp> responses) {
+    private Map<Proto.RecordWithTimestamp, List<Integer>> getResponseToNodesMap(Map<Integer, Proto.RecordWithTimestamp> responses) {
         return responses.entrySet()
                 .stream()
                 .collect(HashMap::new,
                         (map, entry) -> {
                             if (!map.containsKey(entry.getValue())) {
-                                List<String> nodeName = new ArrayList<>();
-                                nodeName.add(entry.getKey());
-                                map.put(entry.getValue(), nodeName);
+                                List<Integer> nodeId = new ArrayList<>();
+                                nodeId.add(entry.getKey());
+                                map.put(entry.getValue(), nodeId);
                             } else {
                                 map.get(entry.getValue()).add(entry.getKey());
                             }
