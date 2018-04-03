@@ -14,7 +14,7 @@ public final class StorageSerializationTest {
     public void simpleSerialization() throws InvalidProtocolBufferException {
         final String value = "some value\nwith\t\rall ._1 kinds of  symbols\0\0\1\2\3\4";
 
-        final byte[] serializeKeyValue = StorageSerializationUtils.serializeKeyValue(value.getBytes());
+        final byte[] serializeKeyValue = StorageSerializationUtils.serializeRecord(value.getBytes());
         final Proto.RecordWithTimestamp record = StorageSerializationUtils.deserializeRecord(serializeKeyValue);
 
         assertArrayEquals(value.getBytes(), record.getValue().toByteArray());
