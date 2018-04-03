@@ -16,11 +16,10 @@ public interface ConflictResolver {
      *      {@link Proto.RecordWithTimestamp#getValue()} and find the most common one. Return
      *      any record with this value.
      *      3. If multiple different values are the most common ones (i.e. the occur the same number of times)
-     *      pick the one which was sent by the node with minimum ID (Note: node ID is a string so it will be
-     *      a lexicographical order).
+     *      pick the one which was sent by the node with minimum ID.
      */
-    Proto.RecordWithTimestamp resolve(Map<String, Proto.RecordWithTimestamp> responses);
+    Proto.RecordWithTimestamp resolve(Map<Integer, Proto.RecordWithTimestamp> responses);
 
-    Set<String> resolveKeys(Map<String, Set<String>> responses);
+    Set<String> resolveKeys(Map<Integer, Set<String>> responses);
 
 }
