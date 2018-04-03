@@ -24,17 +24,17 @@ public class ConflictResolverImplTest {
 
     @BeforeClass
     public static void init() throws Exception {
-        final byte[] firstEncodedRecord = StorageSerializationUtils.serializeKeyValue("1".getBytes());
+        final byte[] firstEncodedRecord = StorageSerializationUtils.serializeRecord("1".getBytes());
         firstRecord = StorageSerializationUtils.deserializeRecord(firstEncodedRecord);
 
         // Don't handle it so that we know if it's interrupted exception
         // so that records can not have the same timestamp
         Thread.sleep(10);
 
-        final byte[] secondEncodedRecord = StorageSerializationUtils.serializeKeyValue("2".getBytes());
+        final byte[] secondEncodedRecord = StorageSerializationUtils.serializeRecord("2".getBytes());
         secondRecord = StorageSerializationUtils.deserializeRecord(secondEncodedRecord);
 
-        final byte[] thirdEncodedRecord = StorageSerializationUtils.serializeKeyValue("3".getBytes());
+        final byte[] thirdEncodedRecord = StorageSerializationUtils.serializeRecord("3".getBytes());
         thirdRecord = StorageSerializationUtils.deserializeRecord(thirdEncodedRecord);
 
         final Proto.RecordWithTimestamp.Builder fourthRecordBuilder = Proto.RecordWithTimestamp.newBuilder();

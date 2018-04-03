@@ -35,7 +35,7 @@ public final class ReplicatedKeyValueApi implements KeyValueApi {
 
     @Override
     public void put(String key, byte[] value) {
-        final byte[] rawRecord = StorageSerializationUtils.serializeKeyValue(value);
+        final byte[] rawRecord = StorageSerializationUtils.serializeRecord(value);
 
         final List<Future<Integer>> replicaResults = new ArrayList<>();
         for (KeyValueApi replica: replics) {
