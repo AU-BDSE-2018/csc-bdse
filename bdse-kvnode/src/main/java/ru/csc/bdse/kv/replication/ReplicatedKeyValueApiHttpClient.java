@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public class ReplicatedKeyValueApiHttpClient implements KeyValueApi {
+public final class ReplicatedKeyValueApiHttpClient implements KeyValueApi {
 
     private final List<KeyValueApi> apis = new ArrayList<>();
 
