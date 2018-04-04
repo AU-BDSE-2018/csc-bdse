@@ -104,7 +104,6 @@ public final class CoordinatorKeyValueApi implements KeyValueApi {
         return Optional.of(record.getValue().toByteArray());
     }
 
-    // TODO does not filter-out deleted keys. Should I run "get" on each of this keys? brr, ugly.
     @Override
     public Set<String> getKeys(String prefix) {
         // TODO copy-paste from get()
@@ -139,7 +138,23 @@ public final class CoordinatorKeyValueApi implements KeyValueApi {
             throw new RuntimeException("only got " + successfulReads + " responses. RCL is set to " + RCL);
         }
 
-        return conflictResolver.resolveKeys(returnedKeys);
+
+        /*
+         * We need to filter out deleted records from these keys. I don't see how to do it
+         * without explicitly calling `get` for each key. This approach is super inefficient,
+         * but seems like we don't have any choice right now.
+         */
+
+        final Set<String> resolvedKeys = conflictResolver.resolveKeys(returnedKeys);
+        final Set<String> res = new HashSet<>();
+
+        for (String key: resolvedKeys) {
+            if (get(key).isPresent()) {
+                res.add(key);
+            }
+        }
+
+        return res;
     }
 
     @Override
@@ -166,8 +181,11 @@ public final class CoordinatorKeyValueApi implements KeyValueApi {
     @Override
     public void action(String node, NodeAction action) {
         for (KeyValueApi replica: replics) {
-            // don't catch exceptions here
-            replica.action(node, action);
+            try {
+                replica.action(node, action);
+            } catch (Exception e) {
+                // TODO I'm not sure what we should do in this case. Ignore for now.
+            }
         }
     }
 
