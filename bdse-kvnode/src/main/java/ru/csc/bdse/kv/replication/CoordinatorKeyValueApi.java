@@ -6,7 +6,6 @@ import ru.csc.bdse.kv.NodeAction;
 import ru.csc.bdse.kv.NodeInfo;
 import ru.csc.bdse.kv.serialzation.StorageSerializationUtils;
 import ru.csc.bdse.serialization.Proto;
-import ru.csc.bdse.util.Require;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -14,7 +13,6 @@ import java.util.stream.Collectors;
 
 public final class CoordinatorKeyValueApi implements KeyValueApi {
 
-    private final String name;
     private final ExecutorService executor;
     private final ConflictResolver conflictResolver = new ConflictResolverImpl();
 
@@ -23,10 +21,8 @@ public final class CoordinatorKeyValueApi implements KeyValueApi {
     private int timeout;
     private List<KeyValueApi> replics;
 
-    public CoordinatorKeyValueApi(final String name, int WCL, int RCL, int timeout, List<KeyValueApi> replics) {
-        Require.nonEmpty(name, "empty name");
+    public CoordinatorKeyValueApi(int WCL, int RCL, int timeout, List<KeyValueApi> replics) {
         executor = Executors.newCachedThreadPool();
-        this.name = name;
         this.WCL = WCL;
         this.RCL = RCL;
         this.timeout = timeout;
