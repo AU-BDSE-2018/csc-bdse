@@ -5,9 +5,7 @@ import org.junit.Test;
 import ru.csc.bdse.kv.InMemoryKeyValueApi;
 import ru.csc.bdse.kv.KeyValueApi;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -48,6 +46,29 @@ public class ReplicatedKeyValueApiTest {
         api.delete(key);
         res = api.get(key);
         assertTrue(!res.isPresent());
+    }
+
+    @Test
+    public void getKeysTest() {
+        final String prefix = "key";
+        final String key1 = prefix + "1";
+        final String key2 = prefix + "2";
+        final String key3 = prefix + "3";
+        final String key4 = prefix + "4";
+        final String key5 = "keY5";
+
+        assertTrue(api.getKeys("").isEmpty());
+
+        inMemoryApis.get(0).put(key1, "".getBytes());
+        inMemoryApis.get(1).put(key2, "".getBytes());
+        inMemoryApis.get(2).put(key3, "".getBytes());
+        inMemoryApis.get(2).put(key1, "".getBytes());
+        api.put(key4, "".getBytes());
+        api.put(key5, "".getBytes());
+
+        final Set<String> answer = new HashSet<>(Arrays.asList(key1, key2, key3, key4));
+
+        assertEquals(answer, api.getKeys(prefix));
     }
 
 }
