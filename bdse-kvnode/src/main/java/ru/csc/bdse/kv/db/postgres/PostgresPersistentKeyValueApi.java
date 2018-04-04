@@ -20,6 +20,7 @@ public final class PostgresPersistentKeyValueApi extends PersistentKeyValueApi {
 
     @NotNull
     private final NodeInfo state;
+    private String hbm2ddl = "create";
 
     public PostgresPersistentKeyValueApi(@NotNull String name) {
         this.state = new NodeInfo(name, NodeStatus.DOWN);
@@ -35,6 +36,7 @@ public final class PostgresPersistentKeyValueApi extends PersistentKeyValueApi {
         return new Configuration().configure("hibernate_postgres.cfg.xml")
                 .addAnnotatedClass(Entity.class)
                 .setProperty("hibernate.connection.url", connectionUrl)
+                .setProperty("hibernate.hbm2ddl.auto", hbm2ddl)
                 .buildSessionFactory();
     }
 
@@ -77,6 +79,10 @@ public final class PostgresPersistentKeyValueApi extends PersistentKeyValueApi {
                         e.printStackTrace();
                     }
                     factory = getFactory(ContainerManager.getContainerIp(containerName)); // need to rebuild it
+                    // TODO for some unknown to me reason "validate" option does not work.
+                    // Seems like it creates table in lowercase and validates in normal (entity vs Entity)
+                    // anyways, just disable for now.
+                    hbm2ddl = "none";
                 }
                 break;
             case DOWN:
