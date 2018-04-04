@@ -36,34 +36,7 @@ public final class ReplicatedKeyValueApi implements KeyValueApi {
     @Override
     public void put(String key, byte[] value) {
         final byte[] rawRecord = StorageSerializationUtils.serializeRecord(value);
-
-        final List<Future<Integer>> replicaResults = new ArrayList<>();
-        for (KeyValueApi replica: replics) {
-            Callable<Integer> putTask = () -> {
-                try {
-                    replica.put(key, rawRecord);
-                    return 1;
-                } catch (Exception e) {
-                    return 0;
-                }
-            };
-            replicaResults.add(executor.submit(putTask));
-        }
-
-        int successfulWrites = 0;
-
-        for (Future<Integer> replicaResult: replicaResults) {
-            try {
-                successfulWrites += replicaResult.get(timeout, TimeUnit.SECONDS);
-            } catch (TimeoutException|ExecutionException|InterruptedException e) {
-                // ignore, just leave successfulWrites the same
-            }
-        }
-
-        // should we throw an exception here? `put` is void
-        if (successfulWrites < WCL) {
-            throw new RuntimeException("only got " + successfulWrites + " responses. WCL is set to " + WCL);
-        }
+        putRawRecord(key, rawRecord);
     }
 
     @Override
@@ -126,7 +99,13 @@ public final class ReplicatedKeyValueApi implements KeyValueApi {
             return Optional.empty();
         }
 
-        return Optional.of(conflictResolver.resolve(returnedRecords).getValue().toByteArray());
+        final Proto.RecordWithTimestamp record = conflictResolver.resolve(returnedRecords);
+
+        if (record.getIsDeleted()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(record.getValue().toByteArray());
     }
 
     @Override
@@ -136,7 +115,9 @@ public final class ReplicatedKeyValueApi implements KeyValueApi {
 
     @Override
     public void delete(String key) {
-        throw new UnsupportedOperationException("");
+        final byte[] deletedRecord =
+                StorageSerializationUtils.serializeRecord("".getBytes(), true);
+        putRawRecord(key, deletedRecord);
     }
 
     @Override
@@ -147,6 +128,36 @@ public final class ReplicatedKeyValueApi implements KeyValueApi {
     @Override
     public void action(String node, NodeAction action) {
         throw new UnsupportedOperationException("");
+    }
+
+    private void putRawRecord(String key, byte[] rawRecord) {
+        final List<Future<Integer>> replicaResults = new ArrayList<>();
+        for (KeyValueApi replica: replics) {
+            Callable<Integer> putTask = () -> {
+                try {
+                    replica.put(key, rawRecord);
+                    return 1;
+                } catch (Exception e) {
+                    return 0;
+                }
+            };
+            replicaResults.add(executor.submit(putTask));
+        }
+
+        int successfulWrites = 0;
+
+        for (Future<Integer> replicaResult: replicaResults) {
+            try {
+                successfulWrites += replicaResult.get(timeout, TimeUnit.SECONDS);
+            } catch (TimeoutException|ExecutionException|InterruptedException e) {
+                // ignore, just leave successfulWrites the same
+            }
+        }
+
+        // should we throw an exception here? `put` is void
+        if (successfulWrites < WCL) {
+            throw new RuntimeException("only got " + successfulWrites + " responses. WCL is set to " + WCL);
+        }
     }
 
 }
