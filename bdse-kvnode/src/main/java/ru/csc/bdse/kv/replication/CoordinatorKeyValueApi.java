@@ -11,6 +11,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
+// FIXME: a lot of copy-paste here. Need to remove it in future.
 public final class CoordinatorKeyValueApi implements KeyValueApi {
 
     private final ExecutorService executor;
@@ -37,35 +38,27 @@ public final class CoordinatorKeyValueApi implements KeyValueApi {
 
     @Override
     public Optional<byte[]> get(String key) {
-        final List<Future<Integer>> replicaResults = new ArrayList<>();
         final Map<Integer, Optional<byte[]>> returnedRawRecords = new HashMap<>();
 
         for (int i = 0; i < replics.size(); i++) {
             final int id = i;
-            Callable<Integer> getTask = () -> {
+            Runnable getTask = () -> {
                 try {
                     returnedRawRecords.put(id, replics.get(id).get(key));
-                    return 1;
                 } catch (Exception e) {
-                    return 0;
+                    // ignore
                 }
             };
-            replicaResults.add(executor.submit(getTask));
-        }
-
-        int successfulReads = 0;
-
-        for (Future<Integer> replicaResult: replicaResults) {
             try {
-                successfulReads += replicaResult.get(timeout, TimeUnit.SECONDS);
-            } catch (TimeoutException|ExecutionException|InterruptedException e) {
-                // ignore, just leave successfulReads the same
+                executor.submit(getTask).get(timeout, TimeUnit.SECONDS);
+            } catch (Exception e) {
+                // ignore
             }
         }
 
         // should we throw an exception here? `put` is void
-        if (successfulReads < RCL) {
-            throw new RuntimeException("only got " + successfulReads + " responses. RCL is set to " + RCL);
+        if (returnedRawRecords.size() < RCL) {
+            throw new RuntimeException("only got " + returnedRawRecords.size() + " responses. RCL is set to " + RCL);
         }
 
         // can't return null from collect, so need a record marking a fault
@@ -106,38 +99,23 @@ public final class CoordinatorKeyValueApi implements KeyValueApi {
 
     @Override
     public Set<String> getKeys(String prefix) {
-        // TODO copy-paste from get()
-        final List<Future<Integer>> replicaResults = new ArrayList<>();
         final Map<Integer, Set<String>> returnedKeys = new HashMap<>();
 
         for (int i = 0; i < replics.size(); i++) {
             final int id = i;
-            Callable<Integer> getTask = () -> {
+            final Runnable getTask = () -> {
                 try {
                     returnedKeys.put(id, replics.get(id).getKeys(prefix));
-                    return 1;
                 } catch (Exception e) {
-                    return 0;
+                    // ignore
                 }
             };
-            replicaResults.add(executor.submit(getTask));
-        }
-
-        int successfulReads = 0;
-
-        for (Future<Integer> replicaResult: replicaResults) {
             try {
-                successfulReads += replicaResult.get(timeout, TimeUnit.SECONDS);
+                executor.submit(getTask).get(timeout, TimeUnit.SECONDS);
             } catch (TimeoutException|ExecutionException|InterruptedException e) {
                 // ignore, just leave successfulReads the same
             }
         }
-
-        // should we throw an exception here? `put` is void
-        if (successfulReads < RCL) {
-            throw new RuntimeException("only got " + successfulReads + " responses. RCL is set to " + RCL);
-        }
-
 
         /*
          * We need to filter out deleted records from these keys. I don't see how to do it
@@ -168,8 +146,15 @@ public final class CoordinatorKeyValueApi implements KeyValueApi {
     public Set<NodeInfo> getInfo() {
         final Set<NodeInfo> res = new HashSet<>();
         for (KeyValueApi replica: replics) {
+            final Runnable getInfoTask = () -> {
+                try {
+                    res.addAll(replica.getInfo());
+                } catch (Exception e) {
+                    // ignore
+                }
+            };
             try {
-                res.addAll(replica.getInfo());
+                executor.submit(getInfoTask).get(timeout, TimeUnit.SECONDS);
             } catch (Exception e) {
                 // ignore for now
             }
