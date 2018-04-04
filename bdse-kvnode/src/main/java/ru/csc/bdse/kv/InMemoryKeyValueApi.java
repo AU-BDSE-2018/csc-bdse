@@ -19,9 +19,12 @@ public class InMemoryKeyValueApi implements KeyValueApi {
     private final String name;
     private final ConcurrentMap<String, byte[]> map = new ConcurrentHashMap<>();
 
+    private NodeStatus status;
+
     public InMemoryKeyValueApi(final String name) {
         Require.nonEmpty(name, "empty name");
         this.name = name;
+        status = NodeStatus.UP;
     }
 
     @Override
@@ -54,12 +57,20 @@ public class InMemoryKeyValueApi implements KeyValueApi {
 
     @Override
     public Set<NodeInfo> getInfo() {
-        return Collections.singleton(new NodeInfo(name, NodeStatus.UP));
+        return Collections.singleton(new NodeInfo(name, status));
     }
 
     @Override
     public void action(String node, NodeAction action) {
-        throw new RuntimeException("action not implemented now");
+        if (!name.equals(node)) {
+            return;
+        }
+
+        if (action == NodeAction.DOWN) {
+            status = NodeStatus.DOWN;
+        } else {
+            status = NodeStatus.UP;
+        }
     }
 
 }

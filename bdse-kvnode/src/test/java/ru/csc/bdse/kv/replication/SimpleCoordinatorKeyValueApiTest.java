@@ -98,7 +98,8 @@ public class SimpleCoordinatorKeyValueApiTest {
         api.action("1", NodeAction.DOWN);
         api.action("1", NodeAction.UP);
 
-        assertEquals(answer, api.getInfo());
+        final Set<NodeInfo> res = api.getInfo();
+        assertEquals(answer, res);
     }
 
 }

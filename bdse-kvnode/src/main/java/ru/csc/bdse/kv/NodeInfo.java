@@ -49,7 +49,7 @@ public class NodeInfo {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         NodeInfo nodeInfo = (NodeInfo) o;
-        return Objects.equals(name, nodeInfo.name);
+        return Objects.equals(name, nodeInfo.name) && status == nodeInfo.status;
     }
 
     @Override
