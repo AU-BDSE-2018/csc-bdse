@@ -108,9 +108,42 @@ public final class ReplicatedKeyValueApi implements KeyValueApi {
         return Optional.of(record.getValue().toByteArray());
     }
 
+    // TODO does not filter-out deleted keys. Should I run "get" on each of this keys? brr, ugly.
     @Override
     public Set<String> getKeys(String prefix) {
-        throw new UnsupportedOperationException("");
+        // TODO copy-paste from get()
+        final List<Future<Integer>> replicaResults = new ArrayList<>();
+        final Map<Integer, Set<String>> returnedKeys = new HashMap<>();
+
+        for (int i = 0; i < replics.size(); i++) {
+            final int id = i;
+            Callable<Integer> getTask = () -> {
+                try {
+                    returnedKeys.put(id, replics.get(id).getKeys(prefix));
+                    return 1;
+                } catch (Exception e) {
+                    return 0;
+                }
+            };
+            replicaResults.add(executor.submit(getTask));
+        }
+
+        int successfulReads = 0;
+
+        for (Future<Integer> replicaResult: replicaResults) {
+            try {
+                successfulReads += replicaResult.get(timeout, TimeUnit.SECONDS);
+            } catch (TimeoutException|ExecutionException|InterruptedException e) {
+                // ignore, just leave successfulReads the same
+            }
+        }
+
+        // should we throw an exception here? `put` is void
+        if (successfulReads < RCL) {
+            throw new RuntimeException("only got " + successfulReads + " responses. RCL is set to " + RCL);
+        }
+
+        return conflictResolver.resolveKeys(returnedKeys);
     }
 
     @Override
