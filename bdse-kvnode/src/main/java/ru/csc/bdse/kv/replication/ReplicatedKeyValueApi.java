@@ -155,12 +155,27 @@ public final class ReplicatedKeyValueApi implements KeyValueApi {
 
     @Override
     public Set<NodeInfo> getInfo() {
-        throw new UnsupportedOperationException("");
+        final Set<NodeInfo> res = new HashSet<>();
+        for (KeyValueApi replica: replics) {
+            try {
+                res.addAll(replica.getInfo());
+            } catch (Exception e) {
+                // ignore for now
+            }
+        }
+
+        return res;
     }
 
     @Override
     public void action(String node, NodeAction action) {
-        throw new UnsupportedOperationException("");
+        for (KeyValueApi replica: replics) {
+            try {
+                replica.action(node, action);
+            } catch (Exception e) {
+                // ignore for now
+            }
+        }
     }
 
     private void putRawRecord(String key, byte[] rawRecord) {
