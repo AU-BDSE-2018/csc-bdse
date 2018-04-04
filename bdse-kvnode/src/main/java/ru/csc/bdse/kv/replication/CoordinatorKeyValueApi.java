@@ -170,11 +170,8 @@ public final class CoordinatorKeyValueApi implements KeyValueApi {
     @Override
     public void action(String node, NodeAction action) {
         for (KeyValueApi replica: replics) {
-            try {
-                replica.action(node, action);
-            } catch (Exception e) {
-                // ignore for now
-            }
+            // don't catch exceptions here
+            replica.action(node, action);
         }
     }
 
