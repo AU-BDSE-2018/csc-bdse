@@ -11,7 +11,6 @@ import ru.csc.bdse.util.Env;
 import java.io.File;
 import java.time.Duration;
 import java.util.Set;
-import java.util.UUID;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.junit.Assert.*;
@@ -23,13 +22,12 @@ import static org.junit.Assert.*;
  */
 public class KeyValueApiHttpClientNonFunctionalTest {
 
-    private static String nodeName;
+    private static String nodeName = "node-0";
     private static GenericContainer node;
     private static KeyValueApi api;
 
     @BeforeClass
     public static void setup() {
-        nodeName = "test-node" + UUID.randomUUID().toString().substring(4);
         node = (GenericContainer) new GenericContainer(
                 new ImageFromDockerfile()
                         .withFileFromFile("target/bdse-kvnode-0.0.1-SNAPSHOT.jar", new File
