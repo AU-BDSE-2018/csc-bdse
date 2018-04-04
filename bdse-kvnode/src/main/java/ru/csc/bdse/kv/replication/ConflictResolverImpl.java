@@ -8,6 +8,17 @@ import java.util.stream.Collectors;
 
 public final class ConflictResolverImpl implements ConflictResolver {
 
+    /**
+     * {@inheritDoc}
+     *
+     * the record which is the real value according to the following rules:
+     *      1. Compare records' timestamps. If only one record has maximum timestamp, return it.
+     *      2. If more than one records have maximum timestamp, take the set of their values
+     *      {@link Proto.RecordWithTimestamp#getValue()} and find the most common one. Return
+     *      any record with this value.
+     *      3. If multiple different values are the most common ones (i.e. the occur the same number of times)
+     *      pick the one which was sent by the node with minimum ID.
+     */
     @Override
     public Proto.RecordWithTimestamp resolve(Map<Integer, Proto.RecordWithTimestamp> responses) {
         if (responses.size() == 0) {
@@ -59,6 +70,11 @@ public final class ConflictResolverImpl implements ConflictResolver {
         return responses.get(nodeToUse);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * This implementation just joins all sets into one set.
+     */
     @Override
     public Set<String> resolveKeys(Map<Integer, Set<String>> responses) {
         return responses.values()
