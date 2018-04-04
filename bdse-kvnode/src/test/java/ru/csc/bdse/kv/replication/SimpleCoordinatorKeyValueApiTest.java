@@ -14,7 +14,7 @@ import static org.junit.Assert.assertTrue;
 import static ru.csc.bdse.kv.NodeStatus.DOWN;
 import static ru.csc.bdse.kv.NodeStatus.UP;
 
-public class ReplicatedKeyValueApiTest {
+public class SimpleCoordinatorKeyValueApiTest {
 
     private static final List<KeyValueApi> inMemoryApis = new ArrayList<>();
     private static KeyValueApi api;
@@ -25,7 +25,7 @@ public class ReplicatedKeyValueApiTest {
         inMemoryApis.add(new InMemoryKeyValueApi("1"));
         inMemoryApis.add(new InMemoryKeyValueApi("2"));
         inMemoryApis.add(new InMemoryKeyValueApi("3"));
-        api = new ReplicatedKeyValueApi("replicated", 3, 3, 1, inMemoryApis);
+        api = new CoordinatorKeyValueApi("replicated", 3, 3, 1, inMemoryApis);
     }
 
     @Test

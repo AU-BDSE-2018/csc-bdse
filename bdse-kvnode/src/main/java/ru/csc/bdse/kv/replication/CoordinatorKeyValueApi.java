@@ -12,7 +12,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
-public final class ReplicatedKeyValueApi implements KeyValueApi {
+public final class CoordinatorKeyValueApi implements KeyValueApi {
 
     private final String name;
     private final ExecutorService executor;
@@ -23,7 +23,7 @@ public final class ReplicatedKeyValueApi implements KeyValueApi {
     private int timeout;
     private List<KeyValueApi> replics;
 
-    public ReplicatedKeyValueApi(final String name, int WCL, int RCL, int timeout, List<KeyValueApi> replics) {
+    public CoordinatorKeyValueApi(final String name, int WCL, int RCL, int timeout, List<KeyValueApi> replics) {
         Require.nonEmpty(name, "empty name");
         executor = Executors.newCachedThreadPool();
         this.name = name;
