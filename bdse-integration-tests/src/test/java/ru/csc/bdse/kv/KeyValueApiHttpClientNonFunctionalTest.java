@@ -5,13 +5,13 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.images.builder.ImageFromDockerfile;
+import ru.csc.bdse.kv.client.StorageKeyValueApiHttpClient;
 import ru.csc.bdse.util.Constants;
 import ru.csc.bdse.util.Env;
 
 import java.io.File;
 import java.time.Duration;
 import java.util.Set;
-import java.util.UUID;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.junit.Assert.*;
@@ -21,15 +21,14 @@ import static org.junit.Assert.*;
  *
  * @author alesavin
  */
-public class KeyValueApiHttpClientTest2 {
+public class KeyValueApiHttpClientNonFunctionalTest {
 
-    private static String nodeName;
+    private static String nodeName = "node-0";
     private static GenericContainer node;
     private static KeyValueApi api;
 
     @BeforeClass
     public static void setup() {
-        nodeName = "test-node" + UUID.randomUUID().toString().substring(4);
         node = (GenericContainer) new GenericContainer(
                 new ImageFromDockerfile()
                         .withFileFromFile("target/bdse-kvnode-0.0.1-SNAPSHOT.jar", new File
@@ -40,13 +39,6 @@ public class KeyValueApiHttpClientTest2 {
                 .withStartupTimeout(Duration.of(30, SECONDS))
                 .withFileSystemBind("/var/run/docker.sock", "/var/run/docker.sock");
         node.start();
-        while (!node.isRunning()) {
-            try {
-                Thread.sleep(500);
-            } catch (Exception e) {
-                // ignore
-            }
-        }
         api = newKeyValueApi();
     }
 
@@ -58,7 +50,7 @@ public class KeyValueApiHttpClientTest2 {
 
     private static KeyValueApi newKeyValueApi() {
         final String baseUrl = "http://localhost:" + node.getMappedPort(8080);
-        return new KeyValueApiHttpClient(baseUrl);
+        return new StorageKeyValueApiHttpClient(baseUrl);
     }
 
     @Test
@@ -201,7 +193,7 @@ public class KeyValueApiHttpClientTest2 {
         api.action(nodeName, NodeAction.UP);
 
 
-        final Set<String> keys = api.getKeys("");
+        final Set<String> keys = api.getKeys("Some");
         assertEquals(2, keys.size());
 
         api.delete(key1);

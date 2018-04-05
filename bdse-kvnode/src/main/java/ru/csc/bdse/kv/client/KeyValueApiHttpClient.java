@@ -1,4 +1,4 @@
-package ru.csc.bdse.kv;
+package ru.csc.bdse.kv.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpEntity;
@@ -7,6 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import ru.csc.bdse.kv.KeyValueApi;
+import ru.csc.bdse.kv.NodeAction;
+import ru.csc.bdse.kv.NodeInfo;
 import ru.csc.bdse.util.Constants;
 import ru.csc.bdse.util.Encoding;
 import ru.csc.bdse.util.Require;
@@ -21,9 +24,9 @@ import java.util.Set;
  *
  * @author semkagtn
  */
-public class KeyValueApiHttpClient implements KeyValueApi {
+public abstract class KeyValueApiHttpClient implements KeyValueApi {
 
-    private final String baseUrl;
+    protected final String baseUrl;
     private final RestTemplate rest = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -104,7 +107,7 @@ public class KeyValueApiHttpClient implements KeyValueApi {
         }
     }
 
-    private ResponseEntity<byte[]> request(final String url,
+    protected ResponseEntity<byte[]> request(final String url,
                                            final HttpMethod method,
                                            final byte[] body) {
         try {
