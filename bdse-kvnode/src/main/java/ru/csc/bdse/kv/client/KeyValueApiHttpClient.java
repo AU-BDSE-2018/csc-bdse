@@ -26,7 +26,7 @@ import java.util.Set;
  */
 public abstract class KeyValueApiHttpClient implements KeyValueApi {
 
-    private final String baseUrl;
+    protected final String baseUrl;
     private final RestTemplate rest = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -107,7 +107,7 @@ public abstract class KeyValueApiHttpClient implements KeyValueApi {
         }
     }
 
-    private ResponseEntity<byte[]> request(final String url,
+    protected ResponseEntity<byte[]> request(final String url,
                                            final HttpMethod method,
                                            final byte[] body) {
         try {
