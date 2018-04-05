@@ -3,7 +3,7 @@ package ru.csc.bdse.kv;
 import org.junit.BeforeClass;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.images.builder.ImageFromDockerfile;
-import ru.csc.bdse.kv.client.ControllerKeyValueApiHttpClient;
+import ru.csc.bdse.kv.client.StorageKeyValueApiHttpClient;
 import ru.csc.bdse.util.Env;
 
 import java.io.File;
@@ -16,7 +16,7 @@ import static java.time.temporal.ChronoUnit.SECONDS;
  */
 public class KeyValueApiHttpClientTest extends AbstractKeyValueApiTest {
 
-    public static GenericContainer node;
+    private static GenericContainer node;
 
     @BeforeClass
     public static void init() {
@@ -30,16 +30,11 @@ public class KeyValueApiHttpClientTest extends AbstractKeyValueApiTest {
                 .withStartupTimeout(Duration.of(30, SECONDS))
                 .withFileSystemBind("/var/run/docker.sock", "/var/run/docker.sock");
         node.start();
-
-        final String nodeUrl = "http://" + node.getContainerIpAddress() + ":" + node.getMappedPort(8080);
-        final ControllerKeyValueApiHttpClient nodeCoordinator = new ControllerKeyValueApiHttpClient(nodeUrl);
-        nodeCoordinator.configure(1, 1, 1);
-        nodeCoordinator.addReplica("-");
     }
 
     @Override
     protected KeyValueApi newKeyValueApi() {
         final String baseUrl = "http://localhost:" + node.getMappedPort(8080);
-        return new ControllerKeyValueApiHttpClient(baseUrl);
+        return new StorageKeyValueApiHttpClient(baseUrl);
     }
 }
