@@ -1,9 +1,8 @@
-package ru.csc.bdse.kv.replication;
+package ru.csc.bdse.kv.client;
 
 import ru.csc.bdse.kv.KeyValueApi;
 import ru.csc.bdse.kv.NodeAction;
 import ru.csc.bdse.kv.NodeInfo;
-import ru.csc.bdse.kv.client.ControllerKeyValueApiHttpClient;
 import ru.csc.bdse.kv.serialzation.StorageSerializationUtils;
 import ru.csc.bdse.serialization.Proto;
 
