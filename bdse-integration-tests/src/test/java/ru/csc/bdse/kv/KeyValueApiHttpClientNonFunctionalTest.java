@@ -5,6 +5,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.images.builder.ImageFromDockerfile;
+import ru.csc.bdse.kv.client.StorageKeyValueApiHttpClient;
 import ru.csc.bdse.util.Constants;
 import ru.csc.bdse.util.Env;
 
@@ -56,7 +57,7 @@ public class KeyValueApiHttpClientNonFunctionalTest {
 
     private static KeyValueApi newKeyValueApi() {
         final String baseUrl = "http://localhost:" + node.getMappedPort(8080);
-        return new KeyValueApiHttpClient(baseUrl);
+        return new StorageKeyValueApiHttpClient(baseUrl);
     }
 
     @Test

@@ -3,6 +3,7 @@ package ru.csc.bdse.kv;
 import org.junit.ClassRule;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.images.builder.ImageFromDockerfile;
+import ru.csc.bdse.kv.client.StorageKeyValueApiHttpClient;
 import ru.csc.bdse.util.Env;
 
 import java.io.File;
@@ -29,6 +30,6 @@ public class KeyValueApiHttpClientTest extends AbstractKeyValueApiTest {
     @Override
     protected KeyValueApi newKeyValueApi() {
         final String baseUrl = "http://localhost:" + node.getMappedPort(8080);
-        return new KeyValueApiHttpClient(baseUrl);
+        return new StorageKeyValueApiHttpClient(baseUrl);
     }
 }
