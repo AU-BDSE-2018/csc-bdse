@@ -3,8 +3,6 @@ package ru.csc.bdse.kv.client;
 import ru.csc.bdse.kv.KeyValueApi;
 import ru.csc.bdse.kv.NodeAction;
 import ru.csc.bdse.kv.NodeInfo;
-import ru.csc.bdse.kv.serialzation.StorageSerializationUtils;
-import ru.csc.bdse.serialization.Proto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,10 +37,7 @@ public final class ReplicatedKeyValueApiHttpClient implements KeyValueApi {
     public Optional<byte[]> get(String key) {
         for (KeyValueApi api: apis) {
             try {
-                final Optional<byte[]> rawRecord = api.get(key);
-                if (!rawRecord.isPresent()) continue;
-                final Proto.RecordWithTimestamp record = StorageSerializationUtils.deserializeRecord(rawRecord.get());
-                return Optional.of(record.getValue().toByteArray());
+                return api.get(key);
             } catch (Exception e) {
                 // just ignore
             }
