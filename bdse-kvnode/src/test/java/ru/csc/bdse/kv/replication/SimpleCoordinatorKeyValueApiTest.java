@@ -14,7 +14,7 @@ import static org.junit.Assert.assertTrue;
 import static ru.csc.bdse.kv.NodeStatus.DOWN;
 import static ru.csc.bdse.kv.NodeStatus.UP;
 
-public class SimpleCoordinatorKeyValueApiTest {
+public final class SimpleCoordinatorKeyValueApiTest {
 
     private static final List<KeyValueApi> inMemoryApis = new ArrayList<>();
     private static KeyValueApi api;

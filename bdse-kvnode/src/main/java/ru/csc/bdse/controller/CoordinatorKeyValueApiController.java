@@ -6,7 +6,7 @@ import ru.csc.bdse.kv.KeyValueApi;
 
 @RestController
 @RequestMapping("/coordinator")
-public class CoordinatorKeyValueApiController extends KeyValueApiController {
+public final class CoordinatorKeyValueApiController extends KeyValueApiController {
 
     public CoordinatorKeyValueApiController(final KeyValueApi keyValueApi) {
         super(keyValueApi);

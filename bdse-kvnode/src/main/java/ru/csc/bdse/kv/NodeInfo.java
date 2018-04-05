@@ -9,7 +9,7 @@ import java.util.Objects;
  *
  * @author alesavin
  */
-public class NodeInfo {
+public final class NodeInfo {
 
     private String name;
     private NodeStatus status;
