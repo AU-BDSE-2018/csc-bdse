@@ -12,10 +12,7 @@ import ru.csc.bdse.kv.replication.CoordinatorKeyValueApi;
 import ru.csc.bdse.util.Env;
 
 import javax.annotation.PreDestroy;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @SpringBootApplication
 public class Application {
@@ -33,6 +30,11 @@ public class Application {
             RCL = Integer.parseInt(args[2]);
             timeout = Integer.parseInt(args[3]);
             baseUrls = Arrays.asList(Arrays.copyOfRange(args, 4, args.length));
+        } else {
+            WCL = 1;
+            RCL = 1;
+            timeout = 1;
+            baseUrls = Collections.singletonList("-");
         }
 
         SpringApplication.run(Application.class, args);
