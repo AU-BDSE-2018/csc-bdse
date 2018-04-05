@@ -111,7 +111,7 @@ public class KeyValueApiHttpClientNonFunctionalTest {
             }
         }
 
-        final Set<String> keys = api.getKeys("Some");
+        final Set<String> keys = api.getKeys("");
         assertEquals(1, keys.size());
         assertTrue(keys.contains(key1));
 
