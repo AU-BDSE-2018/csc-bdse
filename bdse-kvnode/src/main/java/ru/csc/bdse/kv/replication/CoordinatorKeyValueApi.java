@@ -129,8 +129,12 @@ public final class CoordinatorKeyValueApi implements KeyValueApi {
         final Set<String> res = new HashSet<>();
 
         for (String key: resolvedKeys) {
-            if (get(key).isPresent()) {
-                res.add(key);
+            try {
+                if (get(key).isPresent()) {
+                    res.add(key);
+                }
+            } catch (Exception e) {
+                // ignore
             }
         }
 
