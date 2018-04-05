@@ -30,7 +30,9 @@ public final class AdvancedCoordinatorKeyValueApiTest {
 
     @Test
     public void testCrud() {
-        final KeyValueApi api = new CoordinatorKeyValueApi(3, 3, 1, apis);
+        final CoordinatorKeyValueApi api = new CoordinatorKeyValueApi();
+        api.configure(3, 3, 1);
+        apis.forEach(api::addReplica);
 
         final String key1 = "key1";
         final String key2 = "key2";
@@ -76,13 +78,17 @@ public final class AdvancedCoordinatorKeyValueApiTest {
 
     @Test(expected = RuntimeException.class)
     public void testPutFail() {
-        final KeyValueApi api = new CoordinatorKeyValueApi(4, 3, 1, apis);
+        final CoordinatorKeyValueApi api = new CoordinatorKeyValueApi();
+        api.configure(4, 3, 1);
+        apis.forEach(api::addReplica);
         api.put("some key", "some value".getBytes());
     }
 
     @Test(expected = RuntimeException.class)
     public void testGetFail() {
-        final KeyValueApi api = new CoordinatorKeyValueApi(3, 4, 1, apis);
+        final CoordinatorKeyValueApi api = new CoordinatorKeyValueApi();
+        api.configure(3, 4, 1);
+        apis.forEach(api::addReplica);
         api.put("some key", "some value".getBytes());
         api.get("some key");
     }

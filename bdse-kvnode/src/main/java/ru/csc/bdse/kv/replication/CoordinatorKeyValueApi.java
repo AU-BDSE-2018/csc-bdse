@@ -14,20 +14,22 @@ import java.util.stream.Collectors;
 // FIXME: a lot of copy-paste here. Need to remove it in future.
 public final class CoordinatorKeyValueApi implements KeyValueApi {
 
-    private final ExecutorService executor;
+    private final ExecutorService executor = Executors.newCachedThreadPool();
     private final ConflictResolver conflictResolver = new ConflictResolverImpl();
 
-    private int WCL;
-    private int RCL;
-    private int timeout;
-    private List<KeyValueApi> replics;
+    private int WCL = 1;
+    private int RCL = 1;
+    private int timeout = 1;
+    private List<KeyValueApi> replics = new ArrayList<>();
 
-    public CoordinatorKeyValueApi(int WCL, int RCL, int timeout, List<KeyValueApi> replics) {
-        executor = Executors.newCachedThreadPool();
+    public void configure(int WCL, int RCL, int timeout) {
         this.WCL = WCL;
         this.RCL = RCL;
         this.timeout = timeout;
-        this.replics = replics;
+    }
+
+    public void addReplica(KeyValueApi replica) {
+        replics.add(replica);
     }
 
     @Override

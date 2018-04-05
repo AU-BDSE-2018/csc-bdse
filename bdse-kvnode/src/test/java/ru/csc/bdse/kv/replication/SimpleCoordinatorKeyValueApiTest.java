@@ -25,7 +25,12 @@ public final class SimpleCoordinatorKeyValueApiTest {
         inMemoryApis.add(new InMemoryKeyValueApi("1"));
         inMemoryApis.add(new InMemoryKeyValueApi("2"));
         inMemoryApis.add(new InMemoryKeyValueApi("3"));
-        api = new CoordinatorKeyValueApi(3, 3, 1, inMemoryApis);
+
+
+        CoordinatorKeyValueApi coordinatorKeyValueApi = new CoordinatorKeyValueApi();
+        coordinatorKeyValueApi.configure(3, 3, 1);
+        inMemoryApis.forEach(coordinatorKeyValueApi::addReplica);
+        api = coordinatorKeyValueApi;
     }
 
     @Test
