@@ -29,6 +29,7 @@ public class Application {
     }
 
     private static String randomNodeName() {
+       // return "node-0";
         return "kvnode-" + UUID.randomUUID().toString().substring(4);
     }
 
