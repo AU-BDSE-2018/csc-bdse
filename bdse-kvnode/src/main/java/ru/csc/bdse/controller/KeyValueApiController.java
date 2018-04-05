@@ -16,7 +16,7 @@ import java.util.Set;
  * @author semkagtn
  */
 @RestController
-public class KeyValueApiController {
+public abstract class KeyValueApiController {
 
     private final KeyValueApi keyValueApi;
 

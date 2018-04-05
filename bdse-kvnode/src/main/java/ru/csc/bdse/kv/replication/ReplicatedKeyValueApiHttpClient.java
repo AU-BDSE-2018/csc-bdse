@@ -1,9 +1,9 @@
 package ru.csc.bdse.kv.replication;
 
 import ru.csc.bdse.kv.KeyValueApi;
-import ru.csc.bdse.kv.KeyValueApiHttpClient;
 import ru.csc.bdse.kv.NodeAction;
 import ru.csc.bdse.kv.NodeInfo;
+import ru.csc.bdse.kv.client.ControllerKeyValueApiHttpClient;
 import ru.csc.bdse.kv.serialzation.StorageSerializationUtils;
 import ru.csc.bdse.serialization.Proto;
 
@@ -18,7 +18,7 @@ public final class ReplicatedKeyValueApiHttpClient implements KeyValueApi {
 
     public ReplicatedKeyValueApiHttpClient(final List<String> baseUrls) {
         for (String baseUrl: baseUrls) {
-            apis.add(new KeyValueApiHttpClient(baseUrl));
+            apis.add(new ControllerKeyValueApiHttpClient(baseUrl));
         }
     }
 
