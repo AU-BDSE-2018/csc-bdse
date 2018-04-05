@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  *
  * @author semkagtn
  */
-public class InMemoryKeyValueApi implements KeyValueApi {
+public final class InMemoryKeyValueApi implements KeyValueApi {
 
     private final String name;
     private final ConcurrentMap<String, byte[]> map = new ConcurrentHashMap<>();

@@ -3,7 +3,7 @@ package ru.csc.bdse.util;
 /**
  * @author semkagtn
  */
-public class Constants {
+public final class Constants {
 
     private Constants() {
 

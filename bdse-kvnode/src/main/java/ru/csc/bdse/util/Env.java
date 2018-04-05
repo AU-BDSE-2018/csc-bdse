@@ -5,7 +5,7 @@ import java.util.Optional;
 /**
  * @author semkagtn
  */
-public class Env {
+public final class Env {
 
     private Env() {
 

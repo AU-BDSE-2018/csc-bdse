@@ -6,7 +6,7 @@ import ru.csc.bdse.kv.KeyValueApi;
 
 @RestController
 @RequestMapping("/storage")
-public class StorageKeyValueApiController extends KeyValueApiController {
+public final class StorageKeyValueApiController extends KeyValueApiController {
 
     public StorageKeyValueApiController(final KeyValueApi keyValueApi) {
         super(keyValueApi);

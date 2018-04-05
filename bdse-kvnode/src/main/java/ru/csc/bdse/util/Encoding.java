@@ -6,7 +6,7 @@ import java.net.URLEncoder;
 /**
  * @author semkagtn
  */
-public class Encoding {
+public final class Encoding {
 
     private Encoding() {
 

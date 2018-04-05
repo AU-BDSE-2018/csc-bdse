@@ -3,7 +3,7 @@ package ru.csc.bdse.util;
 /**
  * @author semkagtn
  */
-public class Require {
+public final class Require {
 
     private Require() {
 

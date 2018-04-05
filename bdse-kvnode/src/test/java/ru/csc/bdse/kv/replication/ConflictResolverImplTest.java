@@ -11,7 +11,7 @@ import java.util.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
-public class ConflictResolverImplTest {
+public final class ConflictResolverImplTest {
 
     private static final ConflictResolver resolver = new ConflictResolverImpl();
 

@@ -1,11 +1,14 @@
 package ru.csc.bdse.kv.db;
 
 import org.jetbrains.annotations.NotNull;
-import javax.persistence.*;
+
+import javax.persistence.Column;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 @javax.persistence.Entity
 @Table(name = "Entity")
-public class Entity {
+public final class Entity {
 
     @Id @Column(name = "_key")
     private String key;
