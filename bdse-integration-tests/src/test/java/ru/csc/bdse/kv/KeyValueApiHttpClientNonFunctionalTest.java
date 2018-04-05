@@ -39,13 +39,6 @@ public class KeyValueApiHttpClientNonFunctionalTest {
                 .withStartupTimeout(Duration.of(30, SECONDS))
                 .withFileSystemBind("/var/run/docker.sock", "/var/run/docker.sock");
         node.start();
-        while (!node.isRunning()) {
-            try {
-                Thread.sleep(500);
-            } catch (Exception e) {
-                // ignore
-            }
-        }
         api = newKeyValueApi();
     }
 
@@ -118,7 +111,7 @@ public class KeyValueApiHttpClientNonFunctionalTest {
             }
         }
 
-        final Set<String> keys = api.getKeys("");
+        final Set<String> keys = api.getKeys("Some");
         assertEquals(1, keys.size());
         assertTrue(keys.contains(key1));
 
@@ -200,7 +193,7 @@ public class KeyValueApiHttpClientNonFunctionalTest {
         api.action(nodeName, NodeAction.UP);
 
 
-        final Set<String> keys = api.getKeys("");
+        final Set<String> keys = api.getKeys("Some");
         assertEquals(2, keys.size());
 
         api.delete(key1);
