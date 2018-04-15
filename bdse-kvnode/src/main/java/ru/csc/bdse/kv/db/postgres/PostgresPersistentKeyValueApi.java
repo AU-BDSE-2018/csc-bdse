@@ -10,6 +10,7 @@ import ru.csc.bdse.kv.NodeInfo;
 import ru.csc.bdse.kv.NodeStatus;
 import ru.csc.bdse.kv.db.Entity;
 import ru.csc.bdse.kv.db.PersistentKeyValueApi;
+import ru.csc.bdse.util.Env;
 import ru.csc.bdse.util.containers.ContainerManager;
 import ru.csc.bdse.util.containers.postgres.PostgresContainerManager;
 
@@ -28,11 +29,11 @@ public final class PostgresPersistentKeyValueApi extends PersistentKeyValueApi {
     }
 
     @NotNull
-    private SessionFactory getFactory(@Nullable String containerIp) {
-        if (containerIp == null) {
+    private SessionFactory getFactory(@Nullable String containerHost) {
+        if (containerHost == null) {
             throw new IllegalArgumentException("Container's IP can't be null");
         }
-        final String connectionUrl =  String.format("jdbc:postgresql://%s:5432/postgres", containerIp);
+        final String connectionUrl =  String.format("jdbc:postgresql://%s:5432/postgres", containerHost);
         return new Configuration().configure("hibernate_postgres.cfg.xml")
                 .addAnnotatedClass(Entity.class)
                 .setProperty("hibernate.connection.url", connectionUrl)
@@ -64,11 +65,12 @@ public final class PostgresPersistentKeyValueApi extends PersistentKeyValueApi {
         System.out.println("Handling action " + action);
 
         final String containerName = "bdse-postgres-db-" + state.getName();
+        final String networkName = Env.get(Env.NETWORK_NAME).orElse("bridge");
         boolean managerSucceed;
 
         switch (action) {
             case UP:
-                managerSucceed = new PostgresContainerManager().run(containerName);
+                managerSucceed = new PostgresContainerManager().run(containerName, networkName);
                 if (managerSucceed) {
                     try {
                         if (factory != null) {
@@ -78,7 +80,7 @@ public final class PostgresPersistentKeyValueApi extends PersistentKeyValueApi {
                         System.err.println("Error while closing factory: " + e);
                         e.printStackTrace();
                     }
-                    factory = getFactory(ContainerManager.getContainerIp(containerName)); // need to rebuild it
+                    factory = getFactory(ContainerManager.getContainerHost(containerName, networkName)); // need to rebuild it
                     // TODO for some unknown to me reason "validate" option does not work.
                     // Seems like it creates table in lowercase and validates in normal (entity vs Entity)
                     // anyways, just disable for now.

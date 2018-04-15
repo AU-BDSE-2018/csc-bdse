@@ -52,6 +52,7 @@ public abstract class PersistentKeyValueApi implements KeyValueApi {
 
     @Override
     public void put(String key, byte[] value) {
+        System.out.println("doing put");
         runQuery(session -> {
             final Entity entity = new Entity(key, value);
             session.saveOrUpdate(entity);
@@ -61,6 +62,7 @@ public abstract class PersistentKeyValueApi implements KeyValueApi {
 
     @Override
     public Optional<byte[]> get(String key) {
+        System.out.println("doing get");
         return Optional.ofNullable(runQuery(session -> {
             final Entity entity = session.get(Entity.class, key);
             if (entity != null) {

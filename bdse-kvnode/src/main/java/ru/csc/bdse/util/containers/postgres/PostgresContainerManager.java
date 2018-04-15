@@ -26,7 +26,7 @@ public final class PostgresContainerManager extends ContainerManager {
     // private static final String POSTGRES_DATA_VOLUME_NAME = "bdse-postgres-data";
 
     @Override
-    protected void createContainer(@NotNull String containerName) {
+    protected void createContainer(@NotNull String containerName, @NotNull String networkName) {
         if (getContainerStatus(containerName) != ContainerStatus.DOES_NOT_EXIST) {
             return;
         }
@@ -37,6 +37,7 @@ public final class PostgresContainerManager extends ContainerManager {
                 .withName(containerName)
                 .withBinds(new Bind(createVolume(containerName), postgresData))
                 .withEnv(POSTGRES_ENV)
+                .withNetworkMode(networkName)
                 .exec();
     }
 

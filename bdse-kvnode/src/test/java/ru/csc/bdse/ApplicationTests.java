@@ -10,7 +10,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest
 @Ignore
 public class ApplicationTests {
-	@Test
+
+    @Test
 	public void contextLoads() {
+//        final KeyValueApi api = new ControllerKeyValueApiHttpClient("http://localhost:" + 8080);
+//        api.put("somekey", "some value".getBytes());
+//        System.out.println(new String(api.get("somekey").orElse(":(".getBytes())));
 	}
 }

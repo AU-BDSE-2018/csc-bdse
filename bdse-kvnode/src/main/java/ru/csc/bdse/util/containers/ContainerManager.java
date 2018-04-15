@@ -12,6 +12,26 @@ public abstract class ContainerManager {
 
     protected static final DockerClient dockerClient = DockerClientBuilder.getInstance().build();
 
+    public boolean run(@NotNull String containerName, @NotNull String networkName) {
+        try {
+            createContainer(containerName, networkName);
+            if (getContainerStatus(containerName) != ContainerStatus.RUNNING) {
+                dockerClient.startContainerCmd(containerName).exec();
+            }
+            waitContainerInit(containerName);
+            return true;
+        } catch (Exception e) {
+            System.err.println("Failed to create postgres container." + e);
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean stop(@NotNull String containerName) {
+        dockerClient.stopContainerCmd(containerName).exec();
+        return true;
+    }
+
     protected static ContainerStatus getContainerStatus(@NotNull String containerName) {
         String containerStatus;
 
@@ -51,20 +71,33 @@ public abstract class ContainerManager {
         return inspectResponse.getMountpoint();
     }
 
-    @Nullable
-    public static String getContainerIp(@NotNull String containerName) {
-        final ContainerNetwork cn = dockerClient.inspectContainerCmd(containerName).exec()
-                .getNetworkSettings()
-                .getNetworks()
-                .get("bridge");
-        if (cn == null) {
-            throw new IllegalStateException("DB container is not connected to docker's default bridge? O_o");
+    public static String getContainerHost(@NotNull String containerName, @Nullable String networkName) {
+        if (networkName == null || networkName.equals("bridge")) {
+            return getContainerIp(containerName);
+        } else {
+            return getContainerHostname(containerName);
         }
-
-        return cn.getIpAddress();
     }
 
-    protected abstract void createContainer(@NotNull String containerName);
+    /**
+     * Create docker network with the specified name
+     * @param networkName name of the new network
+     */
+    public static void createNetwork(@NotNull String networkName) {
+        boolean alreadyExists = dockerClient.listNetworksCmd().exec().stream().anyMatch(nw -> nw.getName().equals(networkName));
+        if (alreadyExists) {
+            return;
+        }
+        try {
+            dockerClient.createNetworkCmd().withName(networkName).exec();
+        } catch (Exception e) {
+            // Just print it for now
+            System.err.println("Caught exception " + e + " while creating docker network '" + networkName + "'");
+            e.printStackTrace();
+        }
+    }
+
+    protected abstract void createContainer(@NotNull String containerName, @NotNull String networkName);
 
     /**
      * The problem is that container might be up and running, but is not ready to
@@ -82,25 +115,30 @@ public abstract class ContainerManager {
             // ignore
         }
     }
+//
+//    private static void connectContainer(@NotNull String containerName, @NotNull String networkName) {
+//        dockerClient
+//                .connectToNetworkCmd()
+//                .withContainerId(containerName)
+//                .withNetworkId(networkName)
+//                .exec();
+//    }
 
-    public boolean run(@NotNull String containerName) {
-        try {
-            createContainer(containerName);
-            if (getContainerStatus(containerName) != ContainerStatus.RUNNING) {
-                dockerClient.startContainerCmd(containerName).exec();
-            }
-            waitContainerInit(containerName);
-            return true;
-        } catch (Exception e) {
-            System.err.println("Failed to create postgres container." + e);
-            e.printStackTrace();
-            return false;
+    private static String getContainerIp(@NotNull String containerName) {
+        final ContainerNetwork cn = dockerClient.inspectContainerCmd(containerName).exec()
+                .getNetworkSettings()
+                .getNetworks()
+                .get("bridge");
+        if (cn == null) {
+            throw new IllegalStateException("DB container is not connected to docker's default bridge");
         }
+
+        return cn.getIpAddress();
     }
 
-    public static boolean stop(@NotNull String containerName) {
-        dockerClient.stopContainerCmd(containerName).exec();
-        return true;
+    private static String getContainerHostname(@NotNull String containerName) {
+        return dockerClient.inspectContainerCmd(containerName).exec()
+                .getConfig().getHostName();
     }
 
 }

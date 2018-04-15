@@ -26,6 +26,7 @@ public final class ReplicatedKeyValueApiHttpClient implements KeyValueApi {
                 api.put(key, value);
                 return;
             } catch (Exception e) {
+                System.err.println("Exception while put: " + e);
                 // ignore
             }
         }
@@ -39,6 +40,7 @@ public final class ReplicatedKeyValueApiHttpClient implements KeyValueApi {
             try {
                 return api.get(key);
             } catch (Exception e) {
+                System.err.println("Exception while get: " + e);
                 // just ignore
             }
         }
@@ -52,6 +54,7 @@ public final class ReplicatedKeyValueApiHttpClient implements KeyValueApi {
             try {
                 return api.getKeys(prefix);
             } catch (Exception e) {
+                System.err.println("Exception while getKeys: " + e);
                 // just ignore
             }
         }
@@ -66,6 +69,7 @@ public final class ReplicatedKeyValueApiHttpClient implements KeyValueApi {
                 api.delete(key);
                 return;
             } catch (Exception e) {
+                System.err.println("Exception while delete: " + e);
                 // ignore
             }
         }
@@ -79,6 +83,7 @@ public final class ReplicatedKeyValueApiHttpClient implements KeyValueApi {
             try {
                 return api.getInfo();
             } catch (Exception e) {
+                System.err.println("Exception while getInfo: " + e);
                 // ignore
             }
         }
@@ -93,6 +98,7 @@ public final class ReplicatedKeyValueApiHttpClient implements KeyValueApi {
                 api.action(node, action);
                 return;
             } catch (Exception e) {
+                System.err.println("Exception while action: " + e);
                 // ignore
             }
         }

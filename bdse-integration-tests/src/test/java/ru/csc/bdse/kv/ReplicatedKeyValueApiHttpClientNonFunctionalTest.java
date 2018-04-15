@@ -1,19 +1,24 @@
 package ru.csc.bdse.kv;
 
+import org.assertj.core.api.SoftAssertions;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.images.builder.ImageFromDockerfile;
-import ru.csc.bdse.kv.client.StorageKeyValueApiHttpClient;
+import ru.csc.bdse.kv.client.ReplicatedKeyValueApiHttpClient;
 import ru.csc.bdse.util.Constants;
 import ru.csc.bdse.util.Env;
+import ru.csc.bdse.util.Random;
 
 import java.io.File;
 import java.time.Duration;
+import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
+import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.junit.Assert.*;
 
 /**
@@ -21,7 +26,7 @@ import static org.junit.Assert.*;
  *
  * @author alesavin
  */
-public class KeyValueApiHttpClientNonFunctionalTest {
+public class ReplicatedKeyValueApiHttpClientNonFunctionalTest {
 
     private static String nodeName = "node-0";
     private static GenericContainer node;
@@ -35,9 +40,13 @@ public class KeyValueApiHttpClientNonFunctionalTest {
                                 ("../bdse-kvnode/target/bdse-kvnode-0.0.1-SNAPSHOT.jar"))
                         .withFileFromClasspath("Dockerfile", "kvnode/Dockerfile"))
                 .withEnv(Env.KVNODE_NAME, "node-0")
-                .withEnv(Env.NETWORK_NAME, ru.csc.bdse.Constants.TEST_NETWORK)
-                .withNetworkMode(ru.csc.bdse.Constants.TEST_NETWORK)
+                .withEnv(Env.NETWORK_NAME, "test-network")
+                .withEnv(Env.WCL, "1")
+                .withEnv(Env.RCL, "1")
+                .withEnv(Env.TIMEOUT, "1")
+                .withEnv(Env.REPLICS, "node-0")
                 .withNetworkAliases("node-0")
+                .withNetworkMode("test-network")
                 .withExposedPorts(8080)
                 .withStartupTimeout(Duration.of(30, SECONDS))
                 .withFileSystemBind("/var/run/docker.sock", "/var/run/docker.sock");
@@ -52,8 +61,25 @@ public class KeyValueApiHttpClientNonFunctionalTest {
     }
 
     private static KeyValueApi newKeyValueApi() {
-        final String baseUrl = "http://localhost:" + node.getMappedPort(8080);
-        return new StorageKeyValueApiHttpClient(baseUrl);
+        return new ReplicatedKeyValueApiHttpClient(Collections.singletonList("http://localhost:" + node.getMappedPort(8080)));
+    }
+
+
+    @Test
+    public void createValue() {
+        SoftAssertions softAssert = new SoftAssertions();
+
+        String key = Random.nextKey();
+        byte[] value = Random.nextValue();
+
+        Optional<byte[]> oldValue = api.get(key);
+        softAssert.assertThat(oldValue.isPresent()).as("old value").isFalse();
+
+        api.put(key, value);
+        byte[] newValue = api.get(key).orElse(Constants.EMPTY_BYTE_ARRAY);
+        assertThat(newValue).as("new value").isEqualTo(value);
+
+        softAssert.assertAll();
     }
 
     @Test
@@ -186,9 +212,7 @@ public class KeyValueApiHttpClientNonFunctionalTest {
         try {
             api.getKeys("");
         } catch (RuntimeException e) {
-            if (e.getMessage().equals("Response error: null")) {
-                isException = true;
-            }
+            isException = true;
         }
 
         assertTrue(isException);
