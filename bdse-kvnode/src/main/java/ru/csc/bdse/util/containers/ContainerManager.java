@@ -18,7 +18,7 @@ public abstract class ContainerManager {
             if (getContainerStatus(containerName) != ContainerStatus.RUNNING) {
                 dockerClient.startContainerCmd(containerName).exec();
             }
-            waitContainerInit(containerName);
+            waitContainerInit(containerName, networkName);
             return true;
         } catch (Exception e) {
             System.err.println("Failed to create postgres container." + e);
@@ -108,7 +108,7 @@ public abstract class ContainerManager {
      *
      * @param containerName name of the container to wait
      */
-    protected void waitContainerInit(@NotNull String containerName) {
+    protected void waitContainerInit(@NotNull String containerName, @NotNull String networkName) {
         try {
             Thread.sleep(2000);
         } catch (Exception e) {

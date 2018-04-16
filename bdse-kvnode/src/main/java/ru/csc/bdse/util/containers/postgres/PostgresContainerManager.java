@@ -42,10 +42,10 @@ public final class PostgresContainerManager extends ContainerManager {
     }
 
     @Override
-    protected void waitContainerInit(@NotNull String containerName) {
+    protected void waitContainerInit(@NotNull String containerName, @NotNull String networkName) {
         // TODO I'm to lazy and tired to write this in a normal way, thus this solution for now
 
-        final String CHEAT_COMMAND = "until docker run --rm --link " + containerName
+        final String CHEAT_COMMAND = "until docker run --rm " + "--network=" + networkName + " --link " + containerName
                 + ":pg postgres:latest pg_isready -U postgres -h pg; do sleep 1; done";
 
         try {
@@ -59,7 +59,7 @@ public final class PostgresContainerManager extends ContainerManager {
             process.waitFor();
         } catch (Exception e) {
             System.err.println("Exception while waiting for postgres container: " + e);
-            super.waitContainerInit(containerName);
+            super.waitContainerInit(containerName, networkName);
         }
     }
 
