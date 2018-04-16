@@ -1,5 +1,6 @@
 package ru.csc.bdse.kv;
 
+import com.github.dockerjava.api.command.CreateContainerCmd;
 import org.junit.BeforeClass;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.OutputFrame;
@@ -34,7 +35,7 @@ public class KeyValueApiHttpClientTest extends AbstractKeyValueApiTest {
                 .withEnv(Env.KVNODE_NAME, "node-0")
                 .withEnv(Env.NETWORK_NAME, Constants.TEST_NETWORK)
                 .withNetworkMode(Constants.TEST_NETWORK)
-                .withNetworkAliases("node-0")
+                .withCreateContainerCmdModifier(cmd -> ((CreateContainerCmd)cmd).withAliases("node-0"))
                 .withExposedPorts(8080)
                 .withStartupTimeout(Duration.of(30, SECONDS))
                 .withFileSystemBind("/var/run/docker.sock", "/var/run/docker.sock");

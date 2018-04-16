@@ -1,5 +1,6 @@
 package ru.csc.bdse.kv;
 
+import com.github.dockerjava.api.command.CreateContainerCmd;
 import org.junit.BeforeClass;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.OutputFrame;
@@ -37,7 +38,7 @@ public class ReplicatedKeyValueApiHttpClientTest extends AbstractKeyValueApiTest
                 .withEnv(Env.RCL, "1")
                 .withEnv(Env.TIMEOUT, "1")
                 .withEnv(Env.REPLICS, "node-0")
-                .withNetworkAliases("node-0")
+                .withCreateContainerCmdModifier(cmd -> ((CreateContainerCmd)cmd).withAliases("node-0"))
                 .withNetworkMode(Constants.TEST_NETWORK)
                 .withExposedPorts(8080)
                 .withStartupTimeout(Duration.of(30, SECONDS))
