@@ -48,12 +48,16 @@ public final class CoordinatorKeyValueApi implements KeyValueApi {
                 try {
                     returnedRawRecords.put(id, replics.get(id).get(key));
                 } catch (Exception e) {
+                    System.err.println("get from replica failed: " + e);
+                    e.printStackTrace();
                     // ignore
                 }
             };
             try {
                 executor.submit(getTask).get(timeout, TimeUnit.SECONDS);
             } catch (Exception e) {
+                System.err.println("get from replica failed: " + e);
+                e.printStackTrace();
                 // ignore
             }
         }
@@ -109,12 +113,15 @@ public final class CoordinatorKeyValueApi implements KeyValueApi {
                 try {
                     returnedKeys.put(id, replics.get(id).getKeys(prefix));
                 } catch (Exception e) {
-                    // ignore
+                    System.err.println("getKeys from replica failed: " + e);
+                    e.printStackTrace();
                 }
             };
             try {
                 executor.submit(getTask).get(timeout, TimeUnit.SECONDS);
             } catch (TimeoutException|ExecutionException|InterruptedException e) {
+                System.err.println("getKeys from replica failed: " + e);
+                e.printStackTrace();
                 // ignore, just leave successfulReads the same
             }
         }
@@ -162,6 +169,8 @@ public final class CoordinatorKeyValueApi implements KeyValueApi {
             try {
                 executor.submit(getInfoTask).get(timeout, TimeUnit.SECONDS);
             } catch (Exception e) {
+                System.err.println("getInfo from replica failed: " + e);
+                e.printStackTrace();
                 // ignore for now
             }
         }
@@ -175,6 +184,8 @@ public final class CoordinatorKeyValueApi implements KeyValueApi {
             try {
                 replica.action(node, action);
             } catch (Exception e) {
+                System.err.println("action from replica failed: " + e);
+                e.printStackTrace();
                 // TODO I'm not sure what we should do in this case. Ignore for now.
             }
         }
@@ -188,6 +199,8 @@ public final class CoordinatorKeyValueApi implements KeyValueApi {
                     replica.put(key, rawRecord);
                     return 1;
                 } catch (Exception e) {
+                    System.err.println("put to replica failed: " + e);
+                    e.printStackTrace();
                     return 0;
                 }
             };
@@ -200,6 +213,8 @@ public final class CoordinatorKeyValueApi implements KeyValueApi {
             try {
                 successfulWrites += replicaResult.get(timeout, TimeUnit.SECONDS);
             } catch (TimeoutException|ExecutionException|InterruptedException e) {
+                System.err.println("put to replica failed: " + e);
+                e.printStackTrace();
                 // ignore, just leave successfulWrites the same
             }
         }
@@ -208,6 +223,8 @@ public final class CoordinatorKeyValueApi implements KeyValueApi {
         if (successfulWrites < WCL) {
             throw new RuntimeException("only got " + successfulWrites + " responses. WCL is set to " + WCL);
         }
+
+        System.out.println("successful put of key" + key + " with successfulWrites = " + successfulWrites);
     }
 
 }

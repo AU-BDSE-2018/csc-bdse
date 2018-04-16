@@ -30,11 +30,11 @@ public abstract class PersistentKeyValueApi implements KeyValueApi {
          * our node container. So for now just this stupid check.
          */
         if (getStatus() != NodeStatus.UP) {
-            return null;
+            throw new RuntimeException("Node is currently DOWN");
         }
 
         Transaction tx = null;
-        T res = null;
+        T res;
 
         try (final Session session = factory.openSession()) {
             tx = session.beginTransaction();
@@ -44,7 +44,7 @@ public abstract class PersistentKeyValueApi implements KeyValueApi {
             if (tx != null) {
                 tx.rollback();
             }
-            System.err.println("Exception occurred while running query: " + e);
+            throw new RuntimeException(e);
         }
 
         return res;

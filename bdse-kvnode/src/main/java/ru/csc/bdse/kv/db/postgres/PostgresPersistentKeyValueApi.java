@@ -62,7 +62,7 @@ public final class PostgresPersistentKeyValueApi extends PersistentKeyValueApi {
             return;
         }
 
-        System.out.println("Handling action " + action);
+        System.out.println(node + ": Handling action " + action);
 
         final String containerName = "bdse-postgres-db-" + state.getName();
         final String networkName = Env.get(Env.NETWORK_NAME).orElse("bridge");
