@@ -4,6 +4,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.output.OutputFrame;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import ru.csc.bdse.kv.client.StorageKeyValueApiHttpClient;
 import ru.csc.bdse.util.Constants;
@@ -12,6 +13,7 @@ import ru.csc.bdse.util.Env;
 import java.io.File;
 import java.time.Duration;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.junit.Assert.*;
@@ -41,6 +43,12 @@ public class KeyValueApiHttpClientNonFunctionalTest {
                 .withExposedPorts(8080)
                 .withStartupTimeout(Duration.of(30, SECONDS))
                 .withFileSystemBind("/var/run/docker.sock", "/var/run/docker.sock");
+        node.withLogConsumer(new Consumer<OutputFrame>() {
+            @Override
+            public void accept(OutputFrame outputFrame) {
+                System.err.print(outputFrame.getUtf8String());
+            }
+        });
         node.start();
         api = newKeyValueApi();
     }
