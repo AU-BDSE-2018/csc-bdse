@@ -19,6 +19,7 @@ public final class Env {
     public static final String RCL = "RCL";
     public static final String TIMEOUT = "TIMEOUT";
     public static final String REPLICS = "REPLICS";
+    public static final String PARTITIONER = "PARTITIONER";
 
     public static Optional<String> get(final String name) {
         return Optional.ofNullable(System.getenv(name));

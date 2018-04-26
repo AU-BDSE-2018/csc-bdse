@@ -34,6 +34,7 @@ public final class PostgresPersistentKeyValueApi extends PersistentKeyValueApi {
             throw new IllegalArgumentException("Container's IP can't be null");
         }
         final String connectionUrl =  String.format("jdbc:postgresql://%s:5432/postgres", containerHost);
+        System.out.println("connection url: " + connectionUrl);
         return new Configuration().configure("hibernate_postgres.cfg.xml")
                 .addAnnotatedClass(Entity.class)
                 .setProperty("hibernate.connection.url", connectionUrl)
@@ -80,7 +81,9 @@ public final class PostgresPersistentKeyValueApi extends PersistentKeyValueApi {
                         System.err.println("Error while closing factory: " + e);
                         e.printStackTrace();
                     }
+                    System.out.println("network name for getFactory is: " + networkName);
                     factory = getFactory(ContainerManager.getContainerHost(containerName, networkName)); // need to rebuild it
+                    System.out.println("network name for getFactory is: DONE");
                     // TODO for some unknown to me reason "validate" option does not work.
                     // Seems like it creates table in lowercase and validates in normal (entity vs Entity)
                     // anyways, just disable for now.

@@ -13,7 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class PartitionedCoordinatorKeyValueApi implements KeyValueApi {
+public final class PartitionedKeyValueApi implements KeyValueApi {
 
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
