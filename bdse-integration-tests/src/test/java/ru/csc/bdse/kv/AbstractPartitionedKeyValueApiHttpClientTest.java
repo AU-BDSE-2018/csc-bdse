@@ -6,7 +6,6 @@ import org.junit.runners.MethodSorters;
 
 import java.util.HashSet;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
@@ -26,76 +25,63 @@ public abstract class AbstractPartitionedKeyValueApiHttpClientTest {
 
     protected abstract KeyValueApi newCluster1();
     protected abstract KeyValueApi newCluster2();
-    // Stream.generate(() -> RandomStringUtils.randomAlphanumeric(10)).limit(1000).collect(Collectors.toSet());
+
     protected abstract Set<String> keys();
-    protected abstract float expectedKeysLossProportion();
-    protected abstract float expectedUndeletedKeysProportion();
+    protected abstract double expectedKeysLossProportion();
+    protected abstract double expectedUndeletedKeysProportion();
 
     private KeyValueApi cluster1 = newCluster1();
     private KeyValueApi cluster2 = newCluster2();
-
     private Set<String> keys = keys();
 
     @Test
     public void test1put1000KeysAndReadItCorrectlyOnCluster1() {
-        final Random rand = new Random();
-        keys.forEach(k -> {
-            if (rand.nextInt() % 2 == 0) {
-                cluster1.put(k, k.getBytes());
-            } else {
-                cluster2.put(k, k.getBytes());
-            }
-        });
+        keys.forEach(k -> cluster1.put(k, k.getBytes()));
 
         final Set<String> retrievedValues = new HashSet<>();
-        keys.forEach(k -> retrievedValues.add(new String(cluster1.get(k).orElseThrow(() -> new RuntimeException("test fail")))));
+        for (String key: keys) {
+            Optional<byte[]> getRes = cluster1.get(key);
+            retrievedValues.add(new String(getRes.orElseThrow(() -> new RuntimeException("test fail"))));
+        }
 
         assertEquals(keys, retrievedValues);
     }
 
     @Test
     public void test2readKeysFromCluster2AndCheckLossProportion() {
-        int nKeys = 0;
-        for (String key: keys) {
-            Optional<byte[]> getResult = cluster2.get(key);
-            if (getResult.isPresent()) {
-                nKeys++;
-                assertTrue(keys.contains(new String(getResult.get())));
-            } else {
-                nKeys--;
-            }
-        }
-
+        int nKeys = countOnCluster(cluster2);
         int keysLost = keys.size() - nKeys;
-        float keysLossProportion = (float)keysLost / keys.size();
-        assertTrue(Math.abs(expectedKeysLossProportion() - keysLossProportion) < 1.0 / keys.size());
+        double keysLossProportion = keysLost * 1.0 / keys.size();
+        assertEquals(expectedKeysLossProportion(), keysLossProportion, 1e-9);
     }
 
     @Test
     public void test3deleteAllKeysFromCluster2() {
-        // TODO try to delete all keys on cluster2
         keys.forEach(k -> cluster2.delete(k));
+        // TODO try to delete all keys on cluster2
         // Ammm, what should I test here?
         // It's not clear from test name and TODO description
     }
 
     @Test
     public void test4readKeysFromCluster1AfterDeletionAtCluster2() {
-        // TODO read all keys from cluster1, made some statistics (related to expectedUndeletedKeysProportion)
-        int keysLeft = 0;
+        int keysLeft = countOnCluster(cluster1);
+        double keysLeftProportion = keysLeft * 1.0 / keys.size();
+        assertEquals(expectedUndeletedKeysProportion(), keysLeftProportion, 1e-9);
+    }
+
+    private int countOnCluster(KeyValueApi cluster) {
+        int nKeys = 0;
         for (String key: keys) {
-            Optional<byte[]> getResult = cluster1.get(key);
+            Optional<byte[]> getResult = cluster.get(key);
             if (getResult.isPresent()) {
-                keysLeft++;
+                nKeys++;
                 assertTrue(keys.contains(new String(getResult.get())));
-            } else {
-                keysLeft--;
             }
         }
-
-        float keysLeftProportion = (float)keysLeft / keys.size();
-        assertTrue(Math.abs(expectedUndeletedKeysProportion() - keysLeftProportion) < 1.0 / keys.size());
+        return nKeys;
     }
+
 }
 
 

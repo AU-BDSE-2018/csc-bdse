@@ -11,12 +11,25 @@ import java.util.Set;
 
 public final class ReplicatedKeyValueApiHttpClient implements KeyValueApi {
 
+    public enum ClientToUse {
+        CONTROLLER,
+        PATITIONER
+    }
+
     private final List<KeyValueApi> apis = new ArrayList<>();
 
-    public ReplicatedKeyValueApiHttpClient(final List<String> baseUrls) {
+    public ReplicatedKeyValueApiHttpClient(final List<String> baseUrls, ClientToUse clientToUse) {
         for (String baseUrl: baseUrls) {
-            apis.add(new ControllerKeyValueApiHttpClient(baseUrl));
+            if (clientToUse == ClientToUse.CONTROLLER) {
+                apis.add(new ControllerKeyValueApiHttpClient(baseUrl));
+            } else {
+                apis.add(new PartitionedKeyValueApiHttpClient(baseUrl));
+            }
         }
+    }
+
+    public ReplicatedKeyValueApiHttpClient(final List<String> baseUrls) {
+        this(baseUrls, ClientToUse.CONTROLLER);
     }
 
     @Override
