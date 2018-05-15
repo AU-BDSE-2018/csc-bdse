@@ -28,7 +28,7 @@ public class FirstConfigurationPartitionedKeyValueApiHttpClientTest extends Abst
     private static final PartitionedKeyValueApi cluster1 = new PartitionedKeyValueApi();
     private static final PartitionedKeyValueApi cluster2 = new PartitionedKeyValueApi();
 
-    private static final Set<String> keys = Stream.generate(() -> RandomStringUtils.randomAlphanumeric(10)).limit(1000).collect(Collectors.toSet());
+    private static final Set<String> keys = Stream.generate(() -> RandomStringUtils.random(10)).limit(1000).collect(Collectors.toSet());
 
     static {
         cluster1.configure(new FirstLetterPartitioner(names1), 3);
