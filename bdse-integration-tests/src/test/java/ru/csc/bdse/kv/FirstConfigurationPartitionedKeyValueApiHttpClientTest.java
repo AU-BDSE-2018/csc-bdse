@@ -30,13 +30,16 @@ public class FirstConfigurationPartitionedKeyValueApiHttpClientTest extends Abst
 
     private static final Set<String> keys = Stream.generate(() -> RandomStringUtils.random(10)).limit(1000).collect(Collectors.toSet());
 
+    private static final Partitioner partitioner1 = new FirstLetterPartitioner(names1);
+    private static final Partitioner partitioner2 = new FirstLetterPartitioner(names2);
+
     static {
-        cluster1.configure(new FirstLetterPartitioner(names1), 3);
+        cluster1.configure(partitioner1, 3);
         cluster1.addPartition(node0Name, node0);
         cluster1.addPartition(node1Name, node1);
         cluster1.addPartition(node2Name, node2);
 
-        cluster2.configure(new FirstLetterPartitioner(names2), 3);
+        cluster2.configure(partitioner2, 3);
         cluster2.addPartition(node0Name, node0);
         cluster2.addPartition(node2Name, node2);
     }
@@ -58,14 +61,13 @@ public class FirstConfigurationPartitionedKeyValueApiHttpClientTest extends Abst
 
     @Override
     protected double expectedKeysLossProportion() {
-        final Partitioner partitioner = new FirstLetterPartitioner(names1);
-        int onNode1 = 0;
+        int onCluster1Exclusively = 0;
         for (String key: keys) {
-            if (partitioner.getPartition(key).equals("node-1")) {
-                onNode1++;
+            if (!partitioner1.getPartition(key).equals(partitioner2.getPartition(key))) {
+                onCluster1Exclusively++;
             }
         }
-        return onNode1 * 1.0 / keys.size();
+        return onCluster1Exclusively * 1.0 / keys.size();
     }
 
     @Override
