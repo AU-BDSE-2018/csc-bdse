@@ -8,12 +8,18 @@ import ru.csc.bdse.kv.NodeAction;
 import ru.csc.bdse.kv.client.StorageKeyValueApiHttpClient;
 import ru.csc.bdse.kv.db.postgres.PostgresPersistentKeyValueApi;
 import ru.csc.bdse.kv.replication.CoordinatorKeyValueApi;
+import ru.csc.bdse.partitioning.PartitionedKeyValueApi;
+import ru.csc.bdse.partitioning.Partitioner;
 import ru.csc.bdse.util.Env;
 
 import javax.annotation.PreDestroy;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
+
+import static ru.csc.bdse.util.Constants.PARTITIONERS;
 
 @SpringBootApplication
 public class Application {
@@ -34,6 +40,34 @@ public class Application {
     private static String randomNodeName() {
        //return "node-0";
        return "kvnode-" + UUID.randomUUID().toString().substring(4);
+    }
+
+    @Bean(name = "partitionNode")
+    KeyValueApi partitionNode() throws ClassNotFoundException, InstantiationException,
+            IllegalAccessException, InvocationTargetException {
+        // TODO get rid of this copy-paste
+        System.out.println("partition init. nodeName is " + nodeName);
+
+        final PartitionedKeyValueApi partition = new PartitionedKeyValueApi();
+
+        final String partitionerName = Env.get(Env.PARTITIONER).orElse(PARTITIONERS.get(0));
+        final int TIMEOUT = Env.getInt(Env.TIMEOUT).orElse(1);
+        final List<String> REPLICS = Env.getList(Env.REPLICS).orElse(Collections.singletonList(nodeName));
+
+        final Partitioner partitioner = (Partitioner)Class
+                .forName(partitionerName).getDeclaredConstructors()[0].newInstance(new HashSet<>(REPLICS));
+        partition.configure(partitioner, TIMEOUT);
+        REPLICS.forEach(name -> {
+                    KeyValueApi api;
+                    if (name.equals(nodeName)) {
+                        api = storageNodeInUse;
+                    } else {
+                        api = new StorageKeyValueApiHttpClient("http://" + name + ":8080");
+                    }
+                    partition.addPartition(name, api);
+                });
+
+        return partition;
     }
 
     @Bean(name = "coordinatorNode")
@@ -65,7 +99,9 @@ public class Application {
     KeyValueApi storageNode() {
         String nodeName = Env.get(Env.KVNODE_NAME).orElseGet(Application::randomNodeName);
         Application.nodeName = nodeName;
+        System.out.println("storageNode init. nodeName is " + nodeName);
         storageNodeInUse = new PostgresPersistentKeyValueApi(nodeName);
+        System.out.println("storageNode DONE. nodeName is " + nodeName);
         return storageNodeInUse;
     }
 
