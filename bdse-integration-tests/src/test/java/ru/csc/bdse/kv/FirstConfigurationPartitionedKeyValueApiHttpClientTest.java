@@ -61,13 +61,14 @@ public class FirstConfigurationPartitionedKeyValueApiHttpClientTest extends Abst
 
     @Override
     protected double expectedKeysLossProportion() {
-        int onCluster1Exclusively = 0;
-        for (String key: keys) {
-            if (!partitioner1.getPartition(key).equals(partitioner2.getPartition(key))) {
-                onCluster1Exclusively++;
-            }
-        }
-        return onCluster1Exclusively * 1.0 / keys.size();
+        /*
+            rate = 1/3 потому что те ключи, что были на node-0 и node-2 так же туда и будут попадать,
+            а ключи из node-1 будут попалам между ними разделены и мы их не увидим.
+         */
+
+        double rate = 1f / 3f;
+        double sigma = Math.sqrt(rate * (1 - rate) / keys.size());
+        return rate + 3 * sigma;
     }
 
     @Override

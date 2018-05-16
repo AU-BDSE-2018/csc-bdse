@@ -67,13 +67,20 @@ public class SecondConfigurationPartitionedKeyValueApiHttpClientTest extends Abs
 
     @Override
     protected double expectedKeysLossProportion() {
-        int onCluster1Exclusively = 0;
-        for (String key: keys) {
-            if (!partitioner1.getPartition(key).equals(partitioner2.getPartition(key))) {
-                onCluster1Exclusively++;
-            }
-        }
-        return onCluster1Exclusively * 1.0 / keys.size();
+        /*
+            rate = 0.8 потому что те ключи, для которых верно, что
+            key.hash % 5 == key.hash % 3, те останутся на месте и будут доступны.
+            тогда:
+            5z + x == 3k + x, z \in \mathcal{Z}, k \in \mathcal{Z}
+            z = 3k / 5. => 5 | k.
+
+            Теперь просто смотрим на числа до 15ти и видим, что только 3 числа подходят под верхнее условие.
+            Т.о. мы не теряем 1/5, а значит теряем 1 - 1/5 = 0.8
+         */
+
+        double rate = 0.8;
+        double sigma = Math.sqrt(rate * (1 - rate) / keys.size());
+        return rate + 3 * sigma;
     }
 
     @Override

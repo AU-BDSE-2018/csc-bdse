@@ -62,13 +62,14 @@ public class ThirdConfigurationPartitionedKeyValueApiHttpClientTest extends Abst
 
     @Override
     protected double expectedKeysLossProportion() {
-        int onCluster1Exclusively = 0;
-        for (String key: keys) {
-            if (!partitioner1.getPartition(key).equals(partitioner2.getPartition(key))) {
-                onCluster1Exclusively++;
-            }
-        }
-        return onCluster1Exclusively * 1.0 / keys.size();
+        /*
+            rate = 2/3, т.к. мы имеем 2 независимых случайных велечины (partitioner1 и partitioner2).
+             понятно тогда, что вариантов 9, а подходят нам только 3 из них (когда значение одинаково).
+         */
+
+        double rate = 2f / 3f;
+        double sigma = Math.sqrt(rate * (1 - rate) / keys.size());
+        return rate + 3 * sigma;
     }
 
     @Override

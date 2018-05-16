@@ -52,7 +52,11 @@ public abstract class AbstractPartitionedKeyValueApiHttpClientTest {
         int nKeys = countOnCluster(cluster2);
         int keysLost = keys.size() - nKeys;
         double keysLossProportion = keysLost * 1.0 / keys.size();
-        assertEquals(expectedKeysLossProportion(), keysLossProportion, 1e-9);
+        System.out.println(this.getClass().getSimpleName() +
+                " expectedKeysLossProportion <= " + expectedKeysLossProportion() +
+                ", keysLossProportion = " + keysLossProportion);
+        assertTrue(keysLossProportion <= expectedKeysLossProportion());
+
     }
 
     @Test
@@ -67,7 +71,10 @@ public abstract class AbstractPartitionedKeyValueApiHttpClientTest {
     public void test4readKeysFromCluster1AfterDeletionAtCluster2() {
         int keysLeft = countOnCluster(cluster1);
         double keysLeftProportion = keysLeft * 1.0 / keys.size();
-        assertEquals(expectedUndeletedKeysProportion(), keysLeftProportion, 1e-9);
+        System.out.println(this.getClass().getSimpleName() +
+                " expectedUndeletedKeysProportion <= " + expectedUndeletedKeysProportion() +
+                ", keysLossProportion = " + keysLeftProportion);
+        assertTrue(keysLeftProportion <= expectedUndeletedKeysProportion());
     }
 
     private int countOnCluster(KeyValueApi cluster) {
